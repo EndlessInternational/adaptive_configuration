@@ -7,7 +7,7 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'adaptiveconfiguration'
+gem 'adaptive_configuration'
 ```
 
 And then execute:
@@ -19,17 +19,17 @@ bundle install
 Or install it yourself as:
 
 ```bash
-gem install adaptiveconfiguration
+gem install adaptive_configuration
 ```
 
 ## Usage
 
 ### Requiring the Gem
 
-To start using the `adaptiveconfiguration` gem, simply require it in your Ruby application:
+To start using the `adaptive_configuration` gem, simply require it in your Ruby application:
 
 ```ruby
-require 'adaptiveconfiguration'
+require 'adaptive_configuration'
 ```
 
 ### Basic Example
@@ -37,7 +37,7 @@ require 'adaptiveconfiguration'
 Here is a simple example to get started with defining parameters and building a configuration object:
 
 ```ruby
-require 'adaptiveconfiguration'
+require 'adaptive_configuration'
 
 # Define a configuration structure
 configuration = AdaptiveConfiguration::Builder.new do 
@@ -60,7 +60,7 @@ puts result[:version]    # => "1.0"
 You can define nested groups to structure related configurations together:
 
 ```ruby
-require 'adaptiveconfiguration'
+require 'adaptive_configuration'
 
 configuration = AdaptiveConfiguration::Builder.new do 
   parameter :api_key, String
@@ -90,7 +90,7 @@ puts result[:chat_options][:stream]       # => true
 You can use array parameters to store multiple values for a single configuration key:
 
 ```ruby
-require 'adaptiveconfiguration'
+require 'adaptive_configuration'
 
 configuration = AdaptiveConfiguration::Builder.new do 
   parameter :api_key, String
@@ -114,7 +114,7 @@ puts result[:request_options][:headers] # => ["Content-Type: application/json", 
 Here's a more complex example that combines all the features:
 
 ```ruby
-require 'adaptiveconfiguration'
+require 'adaptive_configuration'
 
 configuration = AdaptiveConfiguration::Builder.new do 
   parameter :api_key, String
