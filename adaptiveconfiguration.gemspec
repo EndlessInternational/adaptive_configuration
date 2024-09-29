@@ -1,7 +1,7 @@
 Gem::Specification.new do | spec |
 
   spec.name          = 'adaptiveconfiguration'
-  spec.version       = '1.0.beta01'
+  spec.version       = '1.0.0.beta01'
   spec.authors       = [ 'Kristoph Cichocki-Romanov' ]
   spec.email         = [ 'rubygems.org@kristoph.net' ]
 
@@ -28,7 +28,7 @@ Gem::Specification.new do | spec |
   }
 
   spec.required_ruby_version = '>= 3.0'
-  spec.files         = Dir[ "lib/**/*.rb" ]
+  spec.files         = Dir[ "lib/**/*.rb", "LICENSE", "README.md", "adaptiveconfiguration.gemspec" ]
   spec.require_paths = [ "lib" ]
 
   spec.add_development_dependency 'rspec', '~> 3.13'
