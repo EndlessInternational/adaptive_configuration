@@ -1,6 +1,8 @@
 module AdaptiveConfiguration
   class Context < BasicObject
 
+    attr_reader :errors
+
     def initialize( values = nil, definitions:, converters: )
 
       values = values ? values.transform_keys( &:to_sym ) : {}
@@ -8,6 +10,7 @@ module AdaptiveConfiguration
       @converters = converters&.dup 
       @definitions = definitions&.dup 
       @values = {}
+      @errors = []
       
       @definitions.each do | key, definition |
         name = definition[ :as ] || key 
@@ -30,6 +33,14 @@ module AdaptiveConfiguration
 
     end
 
+    def nil?
+      false  
+    end
+
+    def empty?
+      @values.empty?
+    end
+
     def []( key )
       @values[ key ]
     end
@@ -42,12 +53,18 @@ module AdaptiveConfiguration
       @values.each( &block )
     end
 
+
     def merge( hash )
       self.to_h.merge( hash )
     end
 
-    def empty?
-      @values.empty?
+    def valid?
+      __validate_values
+      @errors.empty?
+    end 
+
+    def validate!
+      __validate_values { | error | ::Kernel.raise error }
     end
 
     def to_h
@@ -103,10 +120,10 @@ module AdaptiveConfiguration
               Context.new( converters: @converters, definitions: definition[ :definitions ] )
             context.instance_eval( &block ) if block
             @values[ name ] = context 
-          else
+          else 
             value = args.first
-            value = _convert_value!( definition[ :type ], method, value ) if definition[ :type ] 
-            @values[ name ] = value
+            new_value = definition[ :type ] ? __coerce_value( definition[ :type ], value ) : value
+            @values[ name ] = new_value.nil? ? value : new_value
           end
         else
           @values[ name ] = definition[ :default_assigned ] ? 
@@ -119,7 +136,10 @@ module AdaptiveConfiguration
           else
             values = ::Kernel.method( :Array ).call( args.first )
             if type = definition[ :type ]
-              values = values.map { | v | _convert_value!( type, method, v ) } 
+              values = values.map do | v | 
+                new_value = __coerce_value( type, v )
+                new_value.nil? ? v : new_value
+              end 
             end
             @values[ name ].concat( values )
           end
@@ -142,28 +162,102 @@ module AdaptiveConfiguration
       @definitions.key?( method ) || self.class.instance_methods.include?( method ) 
     end
 
-    private; def _convert_value!( klass, key, value )
-      return value unless klass && value
+  protected 
+    
+    def __coerce_value( types, value )
 
-      types =::Kernel.method( :Array ).call( klass ) 
+      return value unless types && !value.nil?
+
+      types = ::Kernel.method( :Array ).call( types ) 
       result = nil
 
-      types.each do | type |
-        result = 
-          ( ( value.respond_to?( :is_a? ) && value.is_a?( type ) ) ? value : nil ) ||
-          @converters[ klass ].call( value ) rescue nil 
-        break if result 
+      if value.respond_to?( :is_a? )
+        types.each do | type |
+          result = value.is_a?( type ) ? value : nil 
+          break unless result.nil?
+        end
       end
 
       if result.nil?
-        types_names = types.map( &:name ).join( ', ' )
-        ::Kernel.raise ::TypeError, <<~TEXT.gsub( /\s+/, ' ' ).strip
-          The key #{key} expects a value of type #{types_names} but received an 
-          incompatible #{value.class.name}.
-        TEXT
+        types.each do | type |
+          result = @converters[ type ].call( value ) rescue nil
+          break unless result.nil?
+        end
       end
 
       result
+    end
+
+    def __validate_values( path = nil, &block )
+
+      path.chomp( '/' ) if path
+      @errors = []
+
+      is_of_matching_types = ::Proc.new do | value, types |
+        type_match = false  
+        ::Kernel.method( :Array ).call( types ).each do | type |
+          type_match = value.is_a?( type )
+          break if type_match
+        end
+        type_match
+      end 
+
+      @definitions.each do | key, definition |
+
+        name = definition[ :as ] || key 
+        value = @values[ name ]
+
+        if definition[ :required ] && 
+           ( !value || ( value.respond_to?( :empty ) && value.empty? ) )
+          
+          error = RequirementUnmetError.new( path: path, key: key )
+          block.call( error ) if block
+          @errors << error 
+        
+        elsif !definition[ :default_assigned ] && !value.nil?
+          
+          unless definition[ :array ]
+
+            if definition[ :type ] == :group
+              value.__validate_values( "#{ ( path || '' ) + ( path ? '/' : '' ) + key.to_s }", &block )
+              @errors.concat( value.errors )
+            else     
+              if definition[ :type ] && value && !definition[ :default_assigned ]
+                unless is_of_matching_types.call( value, definition[ :type ] )
+                  error = IncompatibleTypeError.new( 
+                    path: path, key: key, type: definition[ :type ], value: value
+                  )
+                  block.call( error ) if block
+                  @errors << error 
+                end          
+              end
+            end
+
+          else 
+
+            if definition[ :type ] == :group
+              groups.each do | group |
+                group.__validate_values( "#{ ( path || '' ) + ( path ? '/' : '' ) + key.to_s }", &block )
+                @errors.concat( group.errors )
+              end
+            else
+              if definition[ :type ] && !definition[ :default_assigned ]
+                values = ::Kernel.method( :Array ).call( value )
+                values.each do | v | 
+                  unless is_of_matching_types.call( v, definition[ :type ] )
+                    error = IncompatibleTypeError.new( 
+                      path: path, key: key, type: definition[ :type ], value: v
+                    )
+                    block.call( error ) if block
+                    @errors << error 
+                  end
+                end  
+              end
+            end
+
+          end
+        end
+      end
     end
 
   end

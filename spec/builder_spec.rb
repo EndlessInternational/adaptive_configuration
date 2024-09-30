@@ -176,7 +176,10 @@ RSpec.describe AdaptiveConfiguration::Builder do
         configuration.build! do
           integer_array [ 1, 'two', 3 ]
         end
-      }.to raise_error( TypeError, /expects a value of type Integer/ )
+      }.to raise_error( 
+        AdaptiveConfiguration::IncompatibleTypeError, 
+        /expects Integer but received incompatible String/ 
+      )
     end
   end
 
@@ -250,7 +253,10 @@ RSpec.describe AdaptiveConfiguration::Builder do
         configuration.build! do
           age 'twenty'
         end
-      }.to raise_error( TypeError, /The key age expects a value of type Integer but received an incompatible String/ )
+      }.to raise_error( 
+        AdaptiveConfiguration::IncompatibleTypeError, 
+        /expects Integer but received incompatible String/ 
+      )
     end
   end
 
@@ -398,6 +404,7 @@ RSpec.describe AdaptiveConfiguration::Builder do
   end
 
   describe 'boolean parameter edge cases' do
+    
     it 'accepts true and false correctly' do
       configuration = AdaptiveConfiguration::Builder.new do
         parameter :enabled, [ TrueClass, FalseClass ]
@@ -421,12 +428,13 @@ RSpec.describe AdaptiveConfiguration::Builder do
         parameter :enabled, [ TrueClass, FalseClass ]
       end
 
-      expect {
-        configuration.build! do
-          enabled 'yes'
-        end
-      }.to raise_error( TypeError, /expects a value of type TrueClass, FalseClass/ )
+      result = configuration.build! do
+        enabled 'yes'
+      end
+
+      expect( result[ :enabled ] ).to eq( true ) 
     end
+
   end
 
 end

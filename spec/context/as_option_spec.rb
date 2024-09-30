@@ -4,7 +4,7 @@ RSpec.describe AdaptiveConfiguration::Context do
     AdaptiveConfiguration::Builder::DEFAULT_CONVERTERS.dup
   end
 
-  describe 'Handling of the :as Option' do
+  describe ':as option' do
 
     it 'uses the :as option to rename keys' do
       definitions = {

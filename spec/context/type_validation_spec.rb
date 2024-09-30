@@ -19,10 +19,15 @@ RSpec.describe AdaptiveConfiguration::Context do
 
       expect {
         context.age 'not-an-integer'
-      }.to raise_error( TypeError, /expects a value of type Integer/ )
+        context.validate!
+      }.to raise_error( 
+        AdaptiveConfiguration::IncompatibleTypeError, 
+        /expects Integer but received incompatible String/ 
+      )
 
       expect {
         context.age 25
+        context.validate!
       }.not_to raise_error
 
       expect( context[ :age ] ).to eq( 25 )
@@ -39,11 +44,16 @@ RSpec.describe AdaptiveConfiguration::Context do
 
       expect {
         context.scores [ 100, 95, 85 ]
+        context.validate!
       }.not_to raise_error
 
       expect {
         context.scores [ 100, 'ninety', 85 ]
-      }.to raise_error( TypeError, /expects a value of type Integer/ )
+        context.validate!
+      }.to raise_error( 
+        AdaptiveConfiguration::IncompatibleTypeError, 
+        /expects Integer but received incompatible String/  
+      )
     end
 
   end

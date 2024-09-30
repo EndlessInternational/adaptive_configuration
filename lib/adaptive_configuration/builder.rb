@@ -11,14 +11,14 @@ module AdaptiveConfiguration
 
     DEFAULT_CONVERTERS = {
 
+      Array       => ->( v ) { Array( v ) },
       Date        => ->( v ) { v.respond_to?( :to_date ) ? v.to_date : Date.parse( v.to_s ) },
       Time        => ->( v ) { v.respond_to?( :to_time ) ? v.to_time : Time.parse( v.to_s ) },
       URI         => ->( v ) { URI.parse( v.to_s ) },
       String      => ->( v ) { String( v ) },
-      Integer     => ->( v ) { Integer( v ) },
-      Float       => ->( v ) { Float( v ) },
       Rational    => ->( v ) { Rational( v ) },
-      Array       => ->( v ) { Array( v ) },
+      Float       => ->( v ) { Float( v ) },
+      Integer     => ->( v ) { Integer( v ) },
       TrueClass   => ->( v ) { 
         case v
         when Numeric 
@@ -47,13 +47,19 @@ module AdaptiveConfiguration
       @converters[ klass ] = block 
     end
 
-    def build!( values = nil, &block )
+    def build( values = nil, &block )
       context = AdaptiveConfiguration::Context.new( 
         values,
         converters: @converters, 
         definitions: @definitions 
       )
       context.instance_eval( &block ) if block
+      context
+    end
+
+    def build!( values = nil, &block )
+      context = self.build( values, &block )
+      context.validate!
       context
     end
 

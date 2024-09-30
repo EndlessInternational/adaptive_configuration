@@ -44,7 +44,11 @@ RSpec.describe AdaptiveConfiguration::Context do
 
       expect {
         context.numbers [ 1, 'two', 3 ]
-      }.to raise_error( TypeError, /expects a value of type Integer/ )
+        context.validate!
+      }.to raise_error( 
+        AdaptiveConfiguration::IncompatibleTypeError, 
+        /expects Integer but received incompatible String/ 
+      )
     end
 
   end
