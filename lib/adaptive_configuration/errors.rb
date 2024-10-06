@@ -1,5 +1,3 @@
-require 'debug'
-
 module AdaptiveConfiguration
   
   class Error < StandardError; end
