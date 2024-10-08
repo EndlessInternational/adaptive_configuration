@@ -116,8 +116,11 @@ module AdaptiveConfiguration
         unless definition[ :array ] 
           if definition[ :type ] == :group
             context = 
-              @values[ name ] || 
-              Context.new( converters: @converters, definitions: definition[ :definitions ] )
+              @values[ name ] || Context.new( 
+                args.first,
+                converters: @converters, 
+                definitions: definition[ :definitions ] 
+              )
             context.instance_eval( &block ) if block
             @values[ name ] = context 
           else 
@@ -130,7 +133,11 @@ module AdaptiveConfiguration
             ::Array.new : 
             @values[ name ] || ::Array.new
           if definition[ :type ] == :group
-            context = Context.new( converters: @converters, definitions: definition[ :definitions ] )
+            context = Context.new( 
+              args.first,
+              converters: @converters, 
+              definitions: definition[ :definitions ] 
+            )
             context.instance_eval( &block ) if block
             @values[ name ] << context 
           else
