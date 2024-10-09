@@ -1,12 +1,14 @@
 module AdaptiveConfiguration
   class Context < BasicObject
 
+    include ::PP::ObjectMixin if defined?( ::PP )
+
     attr_reader :errors
 
     def initialize( values = nil, definitions:, converters: )
+      raise ArgumentError, 'The Scaffold initialitization attributes must be a Hash pr Hash-like.'\
+        unless values.nil? || ( values.respond_to?( :[] ) && values.respond_to?( :key? ) )
 
-      values = values ? values.transform_keys( &:to_sym ) : {}
-      
       @converters = converters&.dup 
       @definitions = definitions&.dup 
       @values = {}
@@ -14,21 +16,13 @@ module AdaptiveConfiguration
       
       @definitions.each do | key, definition |
         name = definition[ :as ] || key 
-        if definition[ :type ] == :group
-          context = Context.new( 
-            values[ key ] || {},
-            converters: @converters, definitions: definition[ :definitions ], 
-          )
-          @values[ name ] = context unless context.empty?
-        elsif definition.key?( :default )
-          @values[ name ] = definition[ :array ] ? 
-            ::Kernel.method( :Array ).call( definition[ :default ] ) : 
-            definition[ :default ]
-          # note: this is needed to know when an array paramter which was initially assigned
+        if definition.key?( :default )
+          self.__send__( key, definition[ :default ] )
+          # note: this is needed to know when an array parameter which was initially assigned
           #       to a default should be replaced rather than appended
           definition[ :default_assigned ] = true
         end
-        self.__send__( key, values[ key ] ) if values[ key ]
+        self.__send__( key, values[ key ] ) if values && values.key?( key ) 
       end
 
     end
@@ -39,6 +33,10 @@ module AdaptiveConfiguration
 
     def empty?
       @values.empty?
+    end
+
+    def key?( key )
+      @values.key?( key )
     end
 
     def []( key )
@@ -93,7 +91,13 @@ module AdaptiveConfiguration
     end
 
     def inspect
-      @values.inspect
+      { values: @values, definitions: @definitions }.inspect 
+    end
+
+    if defined?( ::PP )
+      def pretty_print( pp )
+        pp.pp( { values: @values, definitions: @definitions } )
+      end
     end
 
     def class
@@ -107,20 +111,23 @@ module AdaptiveConfiguration
     alias :kind_of? :is_a?
 
     def method_missing( method, *args, &block )
-
+    
       if @definitions.key?( method )
-
         definition = @definitions[ method ]
         name = definition[ :as ] || method
 
         unless definition[ :array ] 
           if definition[ :type ] == :group
-            context = 
-              @values[ name ] || Context.new( 
-                args.first,
-                converters: @converters, 
-                definitions: definition[ :definitions ] 
-              )
+            argument = args.first 
+            context = @values[ name ]
+            if context.nil? || argument  
+              context = 
+                Context.new( 
+                  argument,
+                  converters: @converters, 
+                  definitions: definition[ :definitions ] 
+                )
+            end
             context.instance_eval( &block ) if block
             @values[ name ] = context 
           else 
@@ -133,13 +140,17 @@ module AdaptiveConfiguration
             ::Array.new : 
             @values[ name ] || ::Array.new
           if definition[ :type ] == :group
-            context = Context.new( 
-              args.first,
-              converters: @converters, 
-              definitions: definition[ :definitions ] 
-            )
-            context.instance_eval( &block ) if block
-            @values[ name ] << context 
+            values = [ args.first ].flatten
+            values = values.map do | v |
+              context = Context.new( 
+                v,
+                converters: @converters, 
+                definitions: definition[ :definitions ] 
+              )
+              context.instance_eval( &block ) if block
+              context
+            end
+            @values[ name ].concat( values ) 
           else
             values = ::Kernel.method( :Array ).call( args.first )
             if type = definition[ :type ]
@@ -243,6 +254,7 @@ module AdaptiveConfiguration
           else 
 
             if definition[ :type ] == :group
+              groups = ::Kernel.method( :Array ).call( value )
               groups.each do | group |
                 group.__validate_values( "#{ ( path || '' ) + ( path ? '/' : '' ) + key.to_s }", &block )
                 @errors.concat( group.errors )
