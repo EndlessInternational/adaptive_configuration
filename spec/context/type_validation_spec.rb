@@ -6,7 +6,7 @@ RSpec.describe AdaptiveConfiguration::Context do
     AdaptiveConfiguration::Builder::DEFAULT_CONVERTERS.dup
   end
 
-  describe 'Type Validation' do
+  describe 'type validation' do
 
     it 'validates types when setting values' do
       definitions = {

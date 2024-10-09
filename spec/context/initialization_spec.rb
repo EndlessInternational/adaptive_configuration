@@ -97,6 +97,7 @@ RSpec.describe AdaptiveConfiguration::Context do
       definitions = {
         database: {
           type: :group,
+          default: {},
           definitions: {
             host: { type: String, default: 'localhost' },
             port: { type: Integer, default: 5432 }

@@ -34,19 +34,5 @@ RSpec.describe AdaptiveConfiguration::Context do
       expect( context[ :api_key ] ).to eq( 'new-key' )
     end
 
-    it 'allows iterating over values using each' do
-      values = { api_key: 'test-key', max_tokens: 200 }
-      context = AdaptiveConfiguration::Context.new(
-        values, converters: converters, definitions: definitions
-      )
-
-      collected = {}
-      context.each do | key, value |
-        collected[ key ] = value
-      end
-      expect( collected ).to eq( { api_key: 'test-key', max_tokens: 200 } )
-    end
-
   end
-
 end

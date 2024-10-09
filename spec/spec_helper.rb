@@ -1,4 +1,5 @@
 require 'rspec'
+require 'debug'
 require 'adaptive_configuration'
 
 RSpec.configure do | config |
