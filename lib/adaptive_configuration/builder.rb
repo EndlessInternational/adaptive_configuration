@@ -16,6 +16,7 @@ module AdaptiveConfiguration
       Time        => ->( v ) { v.respond_to?( :to_time ) ? v.to_time : Time.parse( v.to_s ) },
       URI         => ->( v ) { URI.parse( v.to_s ) },
       String      => ->( v ) { String( v ) },
+      Symbol      => ->( v ) { v.respond_to?( :to_sym ) ? v.to_sym : nil },
       Rational    => ->( v ) { Rational( v ) },
       Float       => ->( v ) { Float( v ) },
       Integer     => ->( v ) { Integer( v ) },

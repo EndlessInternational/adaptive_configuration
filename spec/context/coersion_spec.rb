@@ -113,12 +113,26 @@ RSpec.describe AdaptiveConfiguration::Context do
       )
 
       context.disabled 'no'
-
       expect( context[ :disabled ] ).to eq( false )
-
       context.disabled 'false'
-
       expect( context[ :disabled ] ).to eq( false )
+    end
+
+    it 'coerces values to Symbol when compatible value is given' do 
+      definitions = {
+        strategy: { type: Symbol }
+      }
+
+      context = AdaptiveConfiguration::Context.new(
+        converters: converters, definitions: definitions 
+      )
+
+      context.strategy 'fight'
+      expect( context[ :strategy ] ).to be_a( Symbol )
+      expect( context[ :strategy ] ).to eq :fight 
+      context.strategy 'flight'
+      expect( context[ :strategy ] ).to be_a( Symbol )
+      expect( context[ :strategy ] ).to eq :flight 
     end
 
     it 'allows custom converters to be added' do
