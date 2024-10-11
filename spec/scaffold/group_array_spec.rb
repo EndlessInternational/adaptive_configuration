@@ -28,11 +28,12 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
               text 'text'
             end 
             
-            expect( scaffold[ :message ] ).to_not be_nil
-            expect( scaffold[ :message ] ).to be_a( Array )
-            expect( scaffold[ :message ].count ).to eq( 1 )
-            expect( scaffold[ :message ][ 0 ][ :role ] ).to eq( :system )
-            expect( scaffold[ :message ][ 0 ][ :text ] ).to eq( 'text' )
+            result = scaffold.to_h 
+            expect( result[ :message ] ).to_not be_nil
+            expect( result[ :message ] ).to be_a( Array )
+            expect( result[ :message ].count ).to eq( 1 )
+            expect( result[ :message ][ 0 ][ :role ] ).to eq( :system )
+            expect( result[ :message ][ 0 ][ :text ] ).to eq( 'text' )
           end
         end
 
@@ -41,11 +42,12 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
             attributes = { message: [ { role: :system, text: 'text' } ] }
             scaffold = build_scaffold( attributes, definitions: definitions )
 
-            expect( scaffold[ :message ] ).to_not be_nil
-            expect( scaffold[ :message ] ).to be_a( Array )
-            expect( scaffold[ :message ].count ).to eq( 1 )
-            expect( scaffold[ :message ][ 0 ][ :role ] ).to eq( :system )
-            expect( scaffold[ :message ][ 0 ][ :text ] ).to eq( 'text' )
+            result = scaffold.to_h
+            expect( result[ :message ] ).to_not be_nil
+            expect( result[ :message ] ).to be_a( Array )
+            expect( result[ :message ].count ).to eq( 1 )
+            expect( result[ :message ][ 0 ][ :role ] ).to eq( :system )
+            expect( result[ :message ][ 0 ][ :text ] ).to eq( 'text' )
           end
         end
       end
@@ -64,19 +66,21 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
               text 'text 1'
             end 
             
-            expect( scaffold[ :message ] ).to_not be_nil
+            result = scaffold.to_h
+            expect( result[ :message ] ).to_not be_nil
             
             scaffold.message do 
               role :assistant
               text 'text 2'
             end 
             
-            expect( scaffold[ :message ] ).to be_a( Array )
-            expect( scaffold[ :message ].count ).to eq( 3 )
-            expect( scaffold[ :message ][ 0 ][ :role ] ).to eq( :system )
-            expect( scaffold[ :message ][ 0 ][ :text ] ).to eq( 'text 0' )
-            expect( scaffold[ :message ][ 2 ][ :role ] ).to eq( :assistant )
-            expect( scaffold[ :message ][ 2 ][ :text ] ).to eq( 'text 2' )
+            result = scaffold.to_h
+            expect( result[ :message ] ).to be_a( Array )
+            expect( result[ :message ].count ).to eq( 3 )
+            expect( result[ :message ][ 0 ][ :role ] ).to eq( :system )
+            expect( result[ :message ][ 0 ][ :text ] ).to eq( 'text 0' )
+            expect( result[ :message ][ 2 ][ :role ] ).to eq( :assistant )
+            expect( result[ :message ][ 2 ][ :text ] ).to eq( 'text 2' )
           end
         end
 
@@ -91,13 +95,14 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
             }
             scaffold = build_scaffold( attributes, definitions: definitions )
 
-            expect( scaffold[ :message ] ).to_not be_nil
-            expect( scaffold[ :message ] ).to be_a( Array )
-            expect( scaffold[ :message ].count ).to eq( 3 )
-            expect( scaffold[ :message ][ 0 ][ :role ] ).to eq( :system )
-            expect( scaffold[ :message ][ 0 ][ :text ] ).to eq( 'text 0' )
-            expect( scaffold[ :message ][ 2 ][ :role ] ).to eq( :assistant )
-            expect( scaffold[ :message ][ 2 ][ :text ] ).to eq( 'text 2' )
+            result = scaffold.to_h
+            expect( result[ :message ] ).to_not be_nil
+            expect( result[ :message ] ).to be_a( Array )
+            expect( result[ :message ].count ).to eq( 3 )
+            expect( result[ :message ][ 0 ][ :role ] ).to eq( :system )
+            expect( result[ :message ][ 0 ][ :text ] ).to eq( 'text 0' )
+            expect( result[ :message ][ 2 ][ :role ] ).to eq( :assistant )
+            expect( result[ :message ][ 2 ][ :text ] ).to eq( 'text 2' )
           end
         end
       end
@@ -139,13 +144,14 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
                 end
               end 
 
-              message = scaffold[ :message ]
+              result = scaffold.to_h
+              message = result[ :message ]
               expect( message ).to_not be_nil
               expect( message ).to be_a( Array )
               expect( message.count ).to eq( 1 )
               expect( message[ 0 ][ :role ] ).to eq( :system )
 
-              content = scaffold[ :message ][ 0 ][ :content ]
+              content = result[ :message ][ 0 ][ :content ]
               expect( content ).to_not be_nil
               expect( content ).to be_a( Array )
               expect( content.count )
@@ -157,13 +163,14 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
               attributes = { message: [ { role: :system, content: [ { text: 'text' } ] } ] }
               scaffold = build_scaffold( attributes, definitions: definitions )
 
-              message = scaffold[ :message ]
+              result = scaffold.to_h
+              message = result[ :message ]
               expect( message ).to_not be_nil
               expect( message ).to be_a( Array )
               expect( message.count ).to eq( 1 )
               expect( message[ 0 ][ :role ] ).to eq( :system )
 
-              content = scaffold[ :message ][ 0 ][ :content ]
+              content = result[ :message ][ 0 ][ :content ]
               expect( content ).to_not be_nil
               expect( content ).to be_a( Array )
               expect( content.count )
@@ -202,11 +209,12 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
               text 'text'
             end
 
-            expect( scaffold[ :messages ] ).to_not be_nil
-            expect( scaffold[ :messages ] ).to be_a( Array )
-            expect( scaffold[ :messages ].count ).to eq( 1 )
-            expect( scaffold[ :messages ][ 0 ][ :role ] ).to eq( :system )
-            expect( scaffold[ :messages ][ 0 ][ :text ] ).to eq( 'text' )
+            result = scaffold.to_h
+            expect( result[ :messages ] ).to_not be_nil
+            expect( result[ :messages ] ).to be_a( Array )
+            expect( result[ :messages ].count ).to eq( 1 )
+            expect( result[ :messages ][ 0 ][ :role ] ).to eq( :system )
+            expect( result[ :messages ][ 0 ][ :text ] ).to eq( 'text' )
           end
         end
 
@@ -215,11 +223,12 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
             attributes = { message: [ { role: :system, text: 'text' } ] }
             scaffold = build_scaffold( attributes, definitions: definitions )
 
-            expect( scaffold[ :messages ] ).to_not be_nil
-            expect( scaffold[ :messages ] ).to be_a( Array )
-            expect( scaffold[ :messages ].count ).to eq( 1 )
-            expect( scaffold[ :messages ][ 0 ][ :role ] ).to eq( :system )
-            expect( scaffold[ :messages ][ 0 ][ :text ] ).to eq( 'text' )
+            result = scaffold.to_h
+            expect( result[ :messages ] ).to_not be_nil
+            expect( result[ :messages ] ).to be_a( Array )
+            expect( result[ :messages ].count ).to eq( 1 )
+            expect( result[ :messages ][ 0 ][ :role ] ).to eq( :system )
+            expect( result[ :messages ][ 0 ][ :text ] ).to eq( 'text' )
           end
         end
       end
@@ -264,13 +273,15 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
                 end
               end 
 
-              messages = scaffold[ :messages ]
+              result = scaffold.to_h
+
+              messages = result[ :messages ]
               expect( messages ).to_not be_nil
               expect( messages ).to be_a( Array )
               expect( messages.count ).to eq( 1 )
               expect( messages[ 0 ][ :role ] ).to eq( :system )
 
-              contents = scaffold[ :messages ][ 0 ][ :contents ]
+              contents = result[ :messages ][ 0 ][ :contents ]
               expect( contents ).to_not be_nil
               expect( contents ).to be_a( Array )
               expect( contents.count )
@@ -282,13 +293,15 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
               attributes = { message: [ { role: :system, content: [ { text: 'text' } ] } ] }
               scaffold = build_scaffold( attributes, definitions: definitions )
 
-              messages = scaffold[ :messages ]
+              result = scaffold.to_h
+                
+              messages = result[ :messages ]
               expect( messages ).to_not be_nil
               expect( messages ).to be_a( Array )
               expect( messages.count ).to eq( 1 )
               expect( messages[ 0 ][ :role ] ).to eq( :system )
 
-              contents = scaffold[ :messages ][ 0 ][ :contents ]
+              contents = result[ :messages ][ 0 ][ :contents ]
               expect( contents ).to_not be_nil
               expect( contents ).to be_a( Array )
               expect( contents.count )

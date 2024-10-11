@@ -1,8 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe AdaptiveConfiguration::Scaffold do
-
-  describe 'paramter type coersion' do
+  describe 'type coersion' do
 
     it 'coerces string values to Integer when type is Integer' do
       definitions = {
@@ -12,8 +11,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
 
       scaffold.count '42'
 
-      expect( scaffold[ :count ] ).to eq( 42 )
-      expect( scaffold[ :count ] ).to be_a( Integer )
+      result = scaffold.to_h
+      expect( result[ :count ] ).to eq( 42 )
+      expect( result[ :count ] ).to be_a( Integer )
     end
 
     it 'coerces string values to Float when type is Float' do
@@ -24,8 +24,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
 
       scaffold.price '19.99'
 
-      expect( scaffold[ :price ] ).to eq( 19.99 )
-      expect( scaffold[ :price ] ).to be_a( Float )
+      result = scaffold.to_h
+      expect( result[ :price ] ).to eq( 19.99 )
+      expect( result[ :price ] ).to be_a( Float )
     end
 
     it 'coerces string values to Date when type is Date' do
@@ -36,9 +37,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
 
       scaffold.start_date '2023-01-01'
 
-      expect( scaffold[ :start_date ] ).to eq( Date.new( 2023, 1, 1 ) )
-      expect( scaffold[ :start_date ] ).to be_a( Date )
-
+      result = scaffold.to_h
+      expect( result[ :start_date ] ).to eq( Date.new( 2023, 1, 1 ) )
+      expect( result[ :start_date ] ).to be_a( Date )
     end
 
     it 'coerces string values to Time when type is Time' do
@@ -49,8 +50,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
 
       scaffold.start_time '2023-01-01 12:34:56'
 
-      expect( scaffold[ :start_time ] ).to eq( Time.parse( '2023-01-01 12:34:56' ) )
-      expect( scaffold[ :start_time ] ).to be_a( Time )
+      result = scaffold.to_h
+      expect( result[ :start_time ] ).to eq( Time.parse( '2023-01-01 12:34:56' ) )
+      expect( result[ :start_time ] ).to be_a( Time )
     end
 
     it 'coerces string values to URI when type is URI' do
@@ -61,9 +63,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
 
       scaffold.website 'http://example.com'
 
-      expect( scaffold[ :website ] ).to eq( URI.parse( 'http://example.com' ) )
-      expect( scaffold[ :website ] ).to be_a( URI )
-
+      result = scaffold.to_h
+      expect( result[ :website ] ).to eq( URI.parse( 'http://example.com' ) )
+      expect( result[ :website ] ).to be_a( URI )
     end
 
     it 'coerces values to TrueClass class when compatible value is given' do
@@ -74,11 +76,13 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
 
       scaffold.enabled 'yes'
 
-      expect( scaffold[ :enabled ] ).to eq( true )
+      result = scaffold.to_h
+      expect( result[ :enabled ] ).to eq( true )
 
       scaffold.enabled 'true'
 
-      expect( scaffold[ :enabled ] ).to eq( true )
+      result = scaffold.to_h
+      expect( result[ :enabled ] ).to eq( true )
     end
 
     it 'coerces values to FalseClass when compatible value is given' do
@@ -88,9 +92,14 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       scaffold = build_scaffold( definitions: definitions )
 
       scaffold.disabled 'no'
-      expect( scaffold[ :disabled ] ).to eq( false )
+
+      result = scaffold.to_h
+      expect( result[ :disabled ] ).to eq( false )
+
       scaffold.disabled 'false'
-      expect( scaffold[ :disabled ] ).to eq( false )
+
+      result = scaffold.to_h
+      expect( result[ :disabled ] ).to eq( false )
     end
 
     it 'coerces values to Symbol when compatible value is given' do 
@@ -100,15 +109,19 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       scaffold = build_scaffold( definitions: definitions )
 
       scaffold.strategy 'fight'
-      expect( scaffold[ :strategy ] ).to be_a( Symbol )
-      expect( scaffold[ :strategy ] ).to eq :fight 
+
+      result = scaffold.to_h
+      expect( result[ :strategy ] ).to be_a( Symbol )
+      expect( result[ :strategy ] ).to eq :fight 
+
       scaffold.strategy 'flight'
-      expect( scaffold[ :strategy ] ).to be_a( Symbol )
-      expect( scaffold[ :strategy ] ).to eq :flight 
+
+      result = scaffold.to_h
+      expect( result[ :strategy ] ).to be_a( Symbol )
+      expect( result[ :strategy ] ).to eq :flight 
     end
 
     it 'allows custom converters to be added' do
-
       class UpcaseString < String
         def initialize( string )
           super( string.upcase )
@@ -119,11 +132,12 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       builder.convert( UpcaseString ) { | v | UpcaseString.new( v ) }
       builder.parameter :name, UpcaseString
 
-      scaffold = builder.build!
-      scaffold.name 'john doe'
+      result = builder.build! do
+        name 'john doe'
+      end 
 
-      expect( scaffold[ :name ] ).to be_a( UpcaseString )
-      expect( scaffold[ :name ].to_s ).to eq( 'JOHN DOE' )
+      expect( result[ :name ] ).to be_a( UpcaseString )
+      expect( result[ :name ].to_s ).to eq( 'JOHN DOE' )
     end
 
     it 'coerces array parameters' do
@@ -134,7 +148,8 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
 
       scaffold.numbers [ '1', '2', '3' ]
 
-      expect( scaffold[ :numbers ] ).to eq( [ 1, 2, 3 ] )
+      result = scaffold.to_h
+      expect( result[ :numbers ] ).to eq( [ 1, 2, 3 ] )
     end
 
     it 'coerces nested contexts' do
@@ -152,24 +167,26 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         age '30'
       end
 
-      expect( scaffold[ :user ][ :age ] ).to eq( 30 )
-      expect( scaffold[ :user ][ :age ] ).to be_a( Integer )
-
+      result = scaffold.to_h
+      expect( result[ :user ][ :age ] ).to eq( 30 )
+      expect( result[ :user ][ :age ] ).to be_a( Integer )
     end
 
     it 'coerces using multiple types' do
-      
       builder = AdaptiveConfiguration::Builder.new
       builder.parameter :value, [ Integer, String ]
 
-      scaffold = builder.build!
-      scaffold.value '42'
+      result = builder.build! do
+        value '42'
+      end
 
-      expect( scaffold[ :value ] ).to eq( '42' )
+      expect( result[ :value ] ).to eq( '42' )
+  
+      result = builder.build do 
+        value 'not a number'
+      end
 
-      scaffold.value 'not a number'
-
-      expect( scaffold[ :value ] ).to eq( 'not a number' )
+      expect( result[ :value ] ).to eq( 'not a number' )
     end
 
     it 'supports coercion with multiple possible types' do
@@ -179,15 +196,17 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       scaffold = build_scaffold( definitions: definitions )
 
       scaffold.flexible_param '123'
-      expect( scaffold[ :flexible_param ] ).to be_a( String )
-      expect( scaffold[ :flexible_param ] ).to eq( '123' )
+      
+      result = scaffold.to_h
+      expect( result[ :flexible_param ] ).to be_a( String )
+      expect( result[ :flexible_param ] ).to eq( '123' )
 
       scaffold.flexible_param 123
-      expect( scaffold[ :flexible_param ] ).to be_a( Integer )
-      expect( scaffold[ :flexible_param ] ).to eq( 123 )
-
+      
+      result = scaffold.to_h
+      expect( result[ :flexible_param ] ).to be_a( Integer )
+      expect( result[ :flexible_param ] ).to eq( 123 )
     end
 
   end
-
 end

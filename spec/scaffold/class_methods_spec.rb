@@ -1,3 +1,5 @@
+require 'spec_helper.rb'
+
 RSpec.describe AdaptiveConfiguration::Scaffold do
 
   describe 'Class Methods and Attributes' do

@@ -328,7 +328,7 @@ RSpec.describe AdaptiveConfiguration::Builder do
       result = configuration.build! do
         optional_param nil
       end
-
+  
       expect( result[ :optional_param ] ).to be_nil
     end
 

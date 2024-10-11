@@ -18,9 +18,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       scaffold = build_scaffold( definitions: definitions )
      
       scaffold.group_a
-      expect( scaffold[ :group_a ][ :value_a ] ).to eq( nil )
+      expect( scaffold.to_h[ :group_a ][ :value_a ] ).to eq( nil )
       scaffold.group_a nil
-      expect( scaffold[ :group_a ][ :value_a ] ).to eq( nil )
+      expect( scaffold.to_h[ :group_a ][ :value_a ] ).to eq( nil )
     end
 
     it 'handles group value parameters correctly' do
@@ -37,7 +37,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       scaffold = build_scaffold( definitions: definitions )
 
       scaffold.group_a( value_a: 'A' )
-      expect( scaffold[ :group_a ][ :value_a ] ).to eq( 'A' )
+      expect( scaffold.to_h[ :group_a ][ :value_a ] ).to eq( 'A' )
     end
 
     it 'handles nested group value parameters correctly' do
@@ -62,8 +62,8 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       scaffold = build_scaffold( definitions: definitions )
       
       scaffold.group_a( value_a: 'A', group_b: { value_b: 'B' } )
-      expect( scaffold[ :group_a ][ :value_a ] ).to eq( 'A' )
-      expect( scaffold[ :group_a ][ :group_b ][ :value_b ] ).to eq( 'B' )
+      expect( scaffold.to_h[ :group_a ][ :value_a ] ).to eq( 'A' )
+      expect( scaffold.to_h[ :group_a ][ :group_b ][ :value_b ] ).to eq( 'B' )
     end
 
   end

@@ -12,8 +12,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       values = { api_key: 'test-key' }
       scaffold = build_scaffold( values, definitions: definitions )
 
-      expect( scaffold[ :api_key ] ).to eq( 'test-key' )
-      expect( scaffold[ :max_tokens ] ).to eq( 100 )
+      result = scaffold.to_h
+      expect( result[ :api_key ] ).to eq( 'test-key' )
+      expect( result[ :max_tokens ] ).to eq( 100 )
     end
 
     it 'initializes with given definitions and values when groups are present' do
@@ -29,8 +30,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       values = { api_key: 'test-key', chat_options: { max_tokens: 1024 } }
       scaffold = build_scaffold( values, definitions: definitions )
 
-      expect( scaffold[ :api_key ] ).to eq( 'test-key' )
-      expect( scaffold[ :chat_options ][ :max_tokens ] ).to eq( 1024 )
+      result = scaffold.to_h
+      expect( result[ :api_key ] ).to eq( 'test-key' )
+      expect( result[ :chat_options ][ :max_tokens ] ).to eq( 1024 )
     end
 
     it 'initializes with given values when aliases are present' do
@@ -41,8 +43,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       values = { api_key: 'test-key' }
       scaffold = build_scaffold( values, definitions: definitions )
 
-      expect( scaffold[ :apiKey ] ).to eq( 'test-key' )
-      expect( scaffold[ :maxTokens ] ).to eq( 100 )
+      result = scaffold.to_h
+      expect( result[ :apiKey ] ).to eq( 'test-key' )
+      expect( result[ :maxTokens ] ).to eq( 100 )
     end
 
     it 'initializes with given values when groups and aliases are present' do
@@ -59,8 +62,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       values = { api_key: 'test-key', chat_options: { max_tokens: 1024 } }
       scaffold = build_scaffold( values, definitions: definitions )
 
-      expect( scaffold[ :apiKey ] ).to eq( 'test-key' )
-      expect( scaffold[ :chatOptions ][ :maxTokens ] ).to eq( 1024 )
+      result = scaffold.to_h
+      expect( result[ :apiKey ] ).to eq( 'test-key' )
+      expect( result[ :chatOptions ][ :maxTokens ] ).to eq( 1024 )
     end
 
     it 'sets default values when values are not provided' do
@@ -70,8 +74,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       }
       scaffold = build_scaffold( definitions: definitions )
 
-      expect( scaffold[ :timeout ] ).to eq( 30 )
-      expect( scaffold[ :retries ] ).to eq( 3 )
+      result = scaffold.to_h
+      expect( result[ :timeout ] ).to eq( 30 )
+      expect( result[ :retries ] ).to eq( 3 )
     end
 
     it 'initializes nested contexts for group types' do
@@ -87,9 +92,10 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       }
       scaffold = build_scaffold( definitions: definitions )
 
-      expect( scaffold[ :database ] ).to be_a( AdaptiveConfiguration::Scaffold )
-      expect( scaffold[ :database ][ :host ] ).to eq( 'localhost' )
-      expect( scaffold[ :database ][ :port ] ).to eq( 5432 )
+      result = scaffold.to_h
+      expect( result[ :database ] ).to be_a( Hash )
+      expect( result[ :database ][ :host ] ).to eq( 'localhost' )
+      expect( result[ :database ][ :port ] ).to eq( 5432 )
     end
 
   end

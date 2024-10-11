@@ -20,7 +20,8 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       scaffold = build_scaffold( definitions: definitions )
 
       scaffold.api_key 'test-key'
-      expect( scaffold[ :api_key ] ).to eq( 'test-key' )
+      result = scaffold.to_h
+      expect( result[ :api_key ] ).to eq( 'test-key' )
     end
 
     it 'supports nested groups using method calls' do
@@ -30,7 +31,8 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         model 'test-model'
       end
 
-      expect( scaffold[ :options ][ :model ] ).to eq( 'test-model' )
+      result = scaffold.to_h
+      expect( result[ :options ][ :model ] ).to eq( 'test-model' )
     end
 
     it 'raises NoMethodError for undefined methods' do

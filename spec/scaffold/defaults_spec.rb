@@ -22,17 +22,20 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       it 'creates the group and assigns the default value' do
         scaffold = build_scaffold( definitions: definitions )
         scaffold.message { text 'text' }
-
-        expect( scaffold[ :message ][ :role ] ).to eq( :default )
-        expect( scaffold[ :message ][ :text ] ).to eq( 'text' )
+        
+        result = scaffold.to_h
+        expect( result[ :message ][ :role ] ).to eq( :default )
+        expect( result[ :message ][ :text ] ).to eq( 'text' )
       end
 
       context 'and attributes that overide the default are given' do
         it 'replaces the default value' do 
           scaffold = build_scaffold( definitions: definitions )
           scaffold.message( { role: :system, text: 'text' } )
-          expect( scaffold[ :message ][ :role ] ).to eq( :system )
-          expect( scaffold[ :message ][ :text ] ).to eq( 'text' )
+
+          result = scaffold.to_h
+          expect( result[ :message ][ :role ] ).to eq( :system )
+          expect( result[ :message ][ :text ] ).to eq( 'text' )
         end
       end
 
@@ -43,8 +46,10 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
             role  :system
             text  'text' 
           }
-          expect( scaffold[ :message ][ :role ] ).to eq( :system )
-          expect( scaffold[ :message ][ :text ] ).to eq( 'text' )
+
+          result = scaffold.to_h
+          expect( result[ :message ][ :role ] ).to eq( :system )
+          expect( result[ :message ][ :text ] ).to eq( 'text' )
         end
       end
 
@@ -54,8 +59,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
           scaffold.message { role :user }
           scaffold.message { text 'text' }
 
-          expect( scaffold[ :message ][ :role ] ).to eq( :user )
-          expect( scaffold[ :message ][ :text ] ).to eq( 'text' )
+          result = scaffold.to_h
+          expect( result[ :message ][ :role ] ).to eq( :user )
+          expect( result[ :message ][ :text ] ).to eq( 'text' )
         end
       end
 
@@ -79,7 +85,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         context 'and the group is not explicitly referenced' do 
           it 'does not assign the default' do
             scaffold = build_scaffold( definitions: definitions )
-            expect( scaffold[ :message ] ).to be_nil
+
+            result = scaffold.to_h
+            expect( result[ :message ] ).to be_nil
           end
         end 
         
@@ -89,8 +97,10 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
             scaffold.message {
               text 'text'
             }
-            expect( scaffold[ :message ][ :role ] ).to eq :system
-            expect( scaffold[ :message ][ :text ] ).to eq 'text'
+
+            result = scaffold.to_h
+            expect( result[ :message ][ :role ] ).to eq :system
+            expect( result[ :message ][ :text ] ).to eq 'text'
           end
         end
       end
@@ -113,8 +123,10 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         context 'and the group is not explicitly referenced' do 
           it 'it does assign the default' do
             scaffold = build_scaffold( definitions: definitions )
-            expect( scaffold[ :message ] ).to_not be_nil
-            expect( scaffold[ :message ][ :role ] ).to eq :system
+
+            result = scaffold.to_h
+            expect( result[ :message ] ).to_not be_nil
+            expect( result[ :message ][ :role ] ).to eq :system
           end
         end 
         
@@ -122,8 +134,10 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
           it 'does assign the default' do 
             scaffold = build_scaffold( definitions: definitions )
             scaffold.message { text 'text' } 
-            expect( scaffold[ :message ][ :role ] ).to eq :system
-            expect( scaffold[ :message ][ :text ] ).to eq 'text'
+
+            result = scaffold.to_h
+            expect( result[ :message ][ :role ] ).to eq :system
+            expect( result[ :message ][ :text ] ).to eq 'text'
           end
         end
 

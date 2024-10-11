@@ -11,8 +11,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       scaffold = build_scaffold( definitions: definitions )
       scaffold.apiKey 'test-key'
 
-      expect( scaffold[ :api_key ] ).to eq( 'test-key' )
-      expect( scaffold[ :apiKey ] ).to be_nil
+      result = scaffold.to_h
+      expect( result[ :api_key ] ).to eq( 'test-key' )
+      expect( result[ :apiKey ] ).to be_nil
     end
 
     it 'applies the :as option within nested groups' do
@@ -29,9 +30,10 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       scaffold.settings do
         userName 'testuser'
       end
-
-      expect( scaffold[ :settings ][ :user_name ] ).to eq( 'testuser' )
-      expect( scaffold[ :settings ][ :userName ] ).to be_nil
+      
+      result = scaffold.to_h
+      expect( result[ :settings ][ :user_name ] ).to eq( 'testuser' )
+      expect( result[ :settings ][ :userName ] ).to be_nil
     end
 
   end

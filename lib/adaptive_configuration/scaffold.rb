@@ -35,36 +35,6 @@ module AdaptiveConfiguration
       @values.empty?
     end
 
-    def key?( key )
-      @values.key?( key )
-    end
-
-    def []( key )
-      @values[ key ]
-    end
-
-    def []=( key, value )
-      @values[ key ] = value
-    end
-
-    def each( &block )
-      @values.each( &block )
-    end
-
-
-    def merge( hash )
-      self.to_h.merge( hash )
-    end
-
-    def valid?
-      __validate_values
-      @errors.empty?
-    end 
-
-    def validate!
-      __validate_values { | error | ::Kernel.raise error }
-    end
-
     def to_h
       recursive_to_h = ->( object ) do
         case object
@@ -86,10 +56,6 @@ module AdaptiveConfiguration
 
     def to_s
       inspect
-    end
-
-    def to_yaml
-      self.to_h.to_yaml
     end
 
     def inspect
@@ -120,12 +86,12 @@ module AdaptiveConfiguration
 
         unless definition[ :array ] 
           if definition[ :type ] == :group
-            argument = args.first 
+            value = args.first 
             context = @values[ name ]
-            if context.nil? || argument  
+            if context.nil? || value  
               context = 
                 Scaffold.new( 
-                  argument,
+                  value,
                   converters: @converters, 
                   definitions: definition[ :definitions ] 
                 )
@@ -167,7 +133,6 @@ module AdaptiveConfiguration
 
         definition[ :default_assigned ] = false
         @values[ name ]
-
       else
         super
       end
@@ -206,79 +171,6 @@ module AdaptiveConfiguration
       end
 
       result
-    end
-
-    def __validate_values( path = nil, &block )
-
-      path.chomp( '/' ) if path
-      @errors = []
-
-      is_of_matching_types = ::Proc.new do | value, types |
-        type_match = false  
-        ::Kernel.method( :Array ).call( types ).each do | type |
-          type_match = value.is_a?( type )
-          break if type_match
-        end
-        type_match
-      end 
-
-      @definitions.each do | key, definition |
-
-        name = definition[ :as ] || key 
-        value = @values[ name ]
-
-        if definition[ :required ] && 
-           ( !value || ( value.respond_to?( :empty ) && value.empty? ) )
-          
-          error = RequirementUnmetError.new( path: path, key: key )
-          block.call( error ) if block
-          @errors << error 
-        
-        elsif !definition[ :default_assigned ] && !value.nil?
-          
-          unless definition[ :array ]
-
-            if definition[ :type ] == :group
-              value.__validate_values( "#{ ( path || '' ) + ( path ? '/' : '' ) + key.to_s }", &block )
-              @errors.concat( value.errors )
-            else     
-              if definition[ :type ] && value && !definition[ :default_assigned ]
-                unless is_of_matching_types.call( value, definition[ :type ] )
-                  error = IncompatibleTypeError.new( 
-                    path: path, key: key, type: definition[ :type ], value: value
-                  )
-                  block.call( error ) if block
-                  @errors << error 
-                end          
-              end
-            end
-
-          else 
-
-            if definition[ :type ] == :group
-              groups = ::Kernel.method( :Array ).call( value )
-              groups.each do | group |
-                group.__validate_values( "#{ ( path || '' ) + ( path ? '/' : '' ) + key.to_s }", &block )
-                @errors.concat( group.errors )
-              end
-            else
-              if definition[ :type ] && !definition[ :default_assigned ]
-                values = ::Kernel.method( :Array ).call( value )
-                values.each do | v | 
-                  unless is_of_matching_types.call( v, definition[ :type ] )
-                    error = IncompatibleTypeError.new( 
-                      path: path, key: key, type: definition[ :type ], value: v
-                    )
-                    block.call( error ) if block
-                    @errors << error 
-                  end
-                end  
-              end
-            end
-
-          end
-        end
-      end
     end
 
   end
