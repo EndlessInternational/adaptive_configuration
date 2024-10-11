@@ -1,12 +1,8 @@
 require 'spec_helper'
 
-RSpec.describe AdaptiveConfiguration::Context do
+RSpec.describe AdaptiveConfiguration::Scaffold do
 
-  let( :converters ) do
-    AdaptiveConfiguration::Builder::DEFAULT_CONVERTERS.dup
-  end
-
-  describe 'to_h Method' do
+  describe 'to_h method' do
 
     it 'converts context to a hash' do
       definitions = {
@@ -18,12 +14,10 @@ RSpec.describe AdaptiveConfiguration::Context do
           }
         }
       }
+      scaffold = build_scaffold( definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        converters: converters, definitions: definitions
-      )
-      context.api_key 'test-key'
-      context.options do
+      scaffold.api_key 'test-key'
+      scaffold.options do
         model 'test-model'
       end
 
@@ -34,17 +28,14 @@ RSpec.describe AdaptiveConfiguration::Context do
         }
       }
 
-      expect( context.to_h ).to eq( expected_hash )
+      expect( scaffold.to_h ).to eq( expected_hash )
     end
 
     it 'handles empty contexts' do
       definitions = {}
+      scaffold = build_scaffold( definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        converters: converters, definitions: definitions
-      )
-
-      expect( context.to_h ).to eq( {} )
+      expect( scaffold.to_h ).to eq( {} )
     end
 
     it 'handles nested contexts with arrays' do
@@ -58,17 +49,14 @@ RSpec.describe AdaptiveConfiguration::Context do
           }
         }
       }
+      scaffold = build_scaffold( definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        converters: converters, definitions: definitions
-      )
-
-      context.messages do
+      scaffold.messages do
         role 'user'
         content 'Hello!'
       end
 
-      context.messages do
+      scaffold.messages do
         role 'assistant'
         content 'Hi there!'
       end
@@ -80,7 +68,7 @@ RSpec.describe AdaptiveConfiguration::Context do
         ]
       }
 
-      expect( context.to_h ).to eq( expected_hash )
+      expect( scaffold.to_h ).to eq( expected_hash )
     end
 
   end

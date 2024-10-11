@@ -337,7 +337,7 @@ RSpec.describe AdaptiveConfiguration::Builder do
         AdaptiveConfiguration::Builder.new do
           parameter :inspect
         end
-      }.to raise_error( NameError, /The parameter inspect cannot be used/ )
+      }.to raise_error( NameError, /The name 'inspect' is reserved/ )
     end
   end
 

@@ -1,8 +1,6 @@
-RSpec.describe AdaptiveConfiguration::Context do
+require 'spec_helper.rb'
 
-  let( :converters ) do
-    AdaptiveConfiguration::Builder::DEFAULT_CONVERTERS.dup
-  end
+RSpec.describe AdaptiveConfiguration::Scaffold do
 
   describe 'group types with arguments' do
 
@@ -17,14 +15,12 @@ RSpec.describe AdaptiveConfiguration::Context do
           }
         }
       }
-
-      context = AdaptiveConfiguration::Context.new(
-        converters: converters, definitions: definitions
-      )
-      context.group_a
-      expect( context[ :group_a ][ :value_a ] ).to eq( nil )
-      context.group_a nil
-      expect( context[ :group_a ][ :value_a ] ).to eq( nil )
+      scaffold = build_scaffold( definitions: definitions )
+     
+      scaffold.group_a
+      expect( scaffold[ :group_a ][ :value_a ] ).to eq( nil )
+      scaffold.group_a nil
+      expect( scaffold[ :group_a ][ :value_a ] ).to eq( nil )
     end
 
     it 'handles group value parameters correctly' do
@@ -38,12 +34,10 @@ RSpec.describe AdaptiveConfiguration::Context do
           }
         }
       }
+      scaffold = build_scaffold( definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        converters: converters, definitions: definitions
-      )
-      context.group_a( value_a: 'A' )
-      expect( context[ :group_a ][ :value_a ] ).to eq( 'A' )
+      scaffold.group_a( value_a: 'A' )
+      expect( scaffold[ :group_a ][ :value_a ] ).to eq( 'A' )
     end
 
     it 'handles nested group value parameters correctly' do
@@ -65,13 +59,11 @@ RSpec.describe AdaptiveConfiguration::Context do
           }
         }
       }
-
-      context = AdaptiveConfiguration::Context.new(
-        converters: converters, definitions: definitions
-      )
-      context.group_a( value_a: 'A', group_b: { value_b: 'B' } )
-      expect( context[ :group_a ][ :value_a ] ).to eq( 'A' )
-      expect( context[ :group_a ][ :group_b ][ :value_b ] ).to eq( 'B' )
+      scaffold = build_scaffold( definitions: definitions )
+      
+      scaffold.group_a( value_a: 'A', group_b: { value_b: 'B' } )
+      expect( scaffold[ :group_a ][ :value_a ] ).to eq( 'A' )
+      expect( scaffold[ :group_a ][ :group_b ][ :value_b ] ).to eq( 'B' )
     end
 
   end

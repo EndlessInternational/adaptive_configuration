@@ -1,5 +1,5 @@
 require_relative 'group_builder'
-require_relative 'context'
+require_relative 'scaffold'
 
 # types must be included to support conversation
 require 'time'
@@ -49,7 +49,7 @@ module AdaptiveConfiguration
     end
 
     def build( values = nil, &block )
-      context = AdaptiveConfiguration::Context.new( 
+      context = AdaptiveConfiguration::Scaffold.new( 
         values,
         converters: @converters, 
         definitions: @definitions 

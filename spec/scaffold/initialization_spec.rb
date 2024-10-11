@@ -1,10 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe AdaptiveConfiguration::Context do
-
-  let( :converters ) do
-    AdaptiveConfiguration::Builder::DEFAULT_CONVERTERS.dup
-  end
+RSpec.describe AdaptiveConfiguration::Scaffold do
 
   describe 'Initialization' do
 
@@ -14,13 +10,10 @@ RSpec.describe AdaptiveConfiguration::Context do
         max_tokens:  { type: Integer, default: 100 }
       }
       values = { api_key: 'test-key' }
+      scaffold = build_scaffold( values, definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        values, converters: converters, definitions: definitions
-      )
-
-      expect( context[ :api_key ] ).to eq( 'test-key' )
-      expect( context[ :max_tokens ] ).to eq( 100 )
+      expect( scaffold[ :api_key ] ).to eq( 'test-key' )
+      expect( scaffold[ :max_tokens ] ).to eq( 100 )
     end
 
     it 'initializes with given definitions and values when groups are present' do
@@ -34,13 +27,10 @@ RSpec.describe AdaptiveConfiguration::Context do
         }
       }
       values = { api_key: 'test-key', chat_options: { max_tokens: 1024 } }
+      scaffold = build_scaffold( values, definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        values, converters: converters, definitions: definitions
-      )
-
-      expect( context[ :api_key ] ).to eq( 'test-key' )
-      expect( context[ :chat_options ][ :max_tokens ] ).to eq( 1024 )
+      expect( scaffold[ :api_key ] ).to eq( 'test-key' )
+      expect( scaffold[ :chat_options ][ :max_tokens ] ).to eq( 1024 )
     end
 
     it 'initializes with given values when aliases are present' do
@@ -49,13 +39,10 @@ RSpec.describe AdaptiveConfiguration::Context do
         max_tokens:  { type: Integer, default: 100, as: :maxTokens }
       }
       values = { api_key: 'test-key' }
+      scaffold = build_scaffold( values, definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        values, converters: converters, definitions: definitions
-      )
-
-      expect( context[ :apiKey ] ).to eq( 'test-key' )
-      expect( context[ :maxTokens ] ).to eq( 100 )
+      expect( scaffold[ :apiKey ] ).to eq( 'test-key' )
+      expect( scaffold[ :maxTokens ] ).to eq( 100 )
     end
 
     it 'initializes with given values when groups and aliases are present' do
@@ -70,13 +57,10 @@ RSpec.describe AdaptiveConfiguration::Context do
         }
       }
       values = { api_key: 'test-key', chat_options: { max_tokens: 1024 } }
+      scaffold = build_scaffold( values, definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        values, converters: converters, definitions: definitions
-      )
-
-      expect( context[ :apiKey ] ).to eq( 'test-key' )
-      expect( context[ :chatOptions ][ :maxTokens ] ).to eq( 1024 )
+      expect( scaffold[ :apiKey ] ).to eq( 'test-key' )
+      expect( scaffold[ :chatOptions ][ :maxTokens ] ).to eq( 1024 )
     end
 
     it 'sets default values when values are not provided' do
@@ -84,13 +68,10 @@ RSpec.describe AdaptiveConfiguration::Context do
         timeout:  { type: Integer, default: 30 },
         retries:  { type: Integer, default: 3 }
       }
+      scaffold = build_scaffold( definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        converters: converters, definitions: definitions
-      )
-
-      expect( context[ :timeout ] ).to eq( 30 )
-      expect( context[ :retries ] ).to eq( 3 )
+      expect( scaffold[ :timeout ] ).to eq( 30 )
+      expect( scaffold[ :retries ] ).to eq( 3 )
     end
 
     it 'initializes nested contexts for group types' do
@@ -104,14 +85,11 @@ RSpec.describe AdaptiveConfiguration::Context do
           }
         }
       }
+      scaffold = build_scaffold( definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        converters: converters, definitions: definitions
-      )
-
-      expect( context[ :database ] ).to be_a( AdaptiveConfiguration::Context )
-      expect( context[ :database ][ :host ] ).to eq( 'localhost' )
-      expect( context[ :database ][ :port ] ).to eq( 5432 )
+      expect( scaffold[ :database ] ).to be_a( AdaptiveConfiguration::Scaffold )
+      expect( scaffold[ :database ][ :host ] ).to eq( 'localhost' )
+      expect( scaffold[ :database ][ :port ] ).to eq( 5432 )
     end
 
   end

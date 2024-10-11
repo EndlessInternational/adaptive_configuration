@@ -2,6 +2,8 @@ require 'rspec'
 require 'debug'
 require 'adaptive_configuration'
 
+Dir[ File.join( __dir__, 'support', '**', '*.rb' ) ].each { |f| require f }
+
 RSpec.configure do | config |
 
   config.expect_with :rspec do | expectations |

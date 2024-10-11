@@ -1,8 +1,6 @@
-RSpec.describe AdaptiveConfiguration::Context do
+require 'spec_helper'
 
-  let( :converters ) do
-    AdaptiveConfiguration::Builder::DEFAULT_CONVERTERS.dup
-  end
+RSpec.describe AdaptiveConfiguration::Scaffold do
 
   describe 'merge' do
 
@@ -16,22 +14,19 @@ RSpec.describe AdaptiveConfiguration::Context do
           }
         }
       }
+      scaffold = build_scaffold( definitions: definitions )
 
-      context = AdaptiveConfiguration::Context.new(
-        converters: converters, definitions: definitions
-      )
-      context.settings do
+      scaffold.settings do
         option1 'value1'
       end
 
-      another_context = AdaptiveConfiguration::Context.new(
-        converters: converters, definitions: definitions
-      )
-      another_context.settings do
+      another_scaffold = build_scaffold( definitions: definitions )
+      
+      another_scaffold.settings do
         option2 'value2'
       end
 
-      merged_context = context.to_h.merge( another_context.to_h ) do | key, oldval, newval |
+      merged_context = scaffold.to_h.merge( another_scaffold.to_h ) do | key, oldval, newval |
         if oldval.is_a?( Hash ) && newval.is_a?( Hash )
           oldval.merge( newval )
         else

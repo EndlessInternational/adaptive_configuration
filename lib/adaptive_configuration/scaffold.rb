@@ -1,5 +1,5 @@
 module AdaptiveConfiguration
-  class Context < BasicObject
+  class Scaffold < BasicObject
 
     include ::PP::ObjectMixin if defined?( ::PP )
 
@@ -68,7 +68,7 @@ module AdaptiveConfiguration
     def to_h
       recursive_to_h = ->( object ) do
         case object
-        when ::AdaptiveConfiguration::Context
+        when ::AdaptiveConfiguration::Scaffold
           recursive_to_h.call( object.to_h )
         when ::Hash
           object.transform_values { | value | recursive_to_h.call( value ) }
@@ -101,11 +101,11 @@ module AdaptiveConfiguration
     end
 
     def class
-      ::AdaptiveConfiguration::Context
+      ::AdaptiveConfiguration::Scaffold
     end
 
     def is_a?( klass )
-      klass == ::AdaptiveConfiguration::Context || klass == ::BasicObject
+      klass == ::AdaptiveConfiguration::Scaffold || klass == ::BasicObject
     end
 
     alias :kind_of? :is_a?
@@ -122,7 +122,7 @@ module AdaptiveConfiguration
             context = @values[ name ]
             if context.nil? || argument  
               context = 
-                Context.new( 
+                Scaffold.new( 
                   argument,
                   converters: @converters, 
                   definitions: definition[ :definitions ] 
@@ -142,7 +142,7 @@ module AdaptiveConfiguration
           if definition[ :type ] == :group
             values = [ args.first ].flatten
             values = values.map do | v |
-              context = Context.new( 
+              context = Scaffold.new( 
                 v,
                 converters: @converters, 
                 definitions: definition[ :definitions ] 
