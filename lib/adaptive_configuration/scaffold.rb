@@ -68,6 +68,8 @@ module AdaptiveConfiguration
     def to_h
       recursive_to_h = ->( object ) do
         case object
+        when ::NilClass
+          nil
         when ::AdaptiveConfiguration::Scaffold
           recursive_to_h.call( object.to_h )
         when ::Hash
