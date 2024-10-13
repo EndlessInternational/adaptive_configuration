@@ -10,7 +10,13 @@ module AdaptiveConfiguration
     end
 
     def configure( attributes = nil, &block )
-      raise RuntimeError, "The adapter configuration has not been defined." \
+      raise RuntimeError, "The configuration has not been defined." \
+        if @configuration_builder.nil?
+      configuration = @configuration_builder.build( attributes, &block )
+    end
+    
+    def configure!( attributes = nil, &block )
+      raise RuntimeError, "The configuration has not been defined." \
         if @configuration_builder.nil?
       configuration = @configuration_builder.build!( attributes, &block )
     end
