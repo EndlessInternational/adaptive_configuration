@@ -152,10 +152,10 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       expect( result[ :numbers ] ).to eq( [ 1, 2, 3 ] )
     end
 
-    it 'coerces nested contexts' do
+    it 'coerces nested scaffolds' do
       definitions = {
         user: {
-          type: :group,
+          type: Object,
           definitions: {
             age: { type: Integer }
           }

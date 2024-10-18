@@ -178,15 +178,15 @@ RSpec.describe AdaptiveConfiguration::Builder do
         end
       }.to raise_error( 
         AdaptiveConfiguration::IncompatibleTypeError, 
-        /expects Integer but received incompatible String/ 
+        /expects 'Integer' but incompatible 'String'/ 
       )
     end
   end
 
-  describe 'nested groups with various types' do
-    it 'handles nested groups with different parameter types' do
+  describe 'nested parameters with various types' do
+    it 'handles nested parameters with different parameter types' do
       configuration = AdaptiveConfiguration::Builder.new do
-        group :database do
+        parameters :database do
           parameter :host, String, default: 'localhost'
           parameter :port, Integer, default: 5432
           parameter :username, String
@@ -215,10 +215,10 @@ RSpec.describe AdaptiveConfiguration::Builder do
     it 'handles complex configurations with arrays of different types and defaults' do
       configuration = AdaptiveConfiguration::Builder.new do
         parameter :api_key, String
-        group :notifications do
+        parameters :notifications do
           parameter :enabled, [ TrueClass, FalseClass ], default: true
           parameter :channels, String, array: true, default: [ 'email', 'sms' ]
-          group :email_settings do
+          parameters :email_settings do
             parameter :sender, String, default: 'no-reply@example.com'
             parameter :recipients, String, array: true
           end
@@ -255,7 +255,7 @@ RSpec.describe AdaptiveConfiguration::Builder do
         end
       }.to raise_error( 
         AdaptiveConfiguration::IncompatibleTypeError, 
-        /expects Integer but received incompatible String/ 
+        /expects 'Integer' but incompatible 'String'/ 
       )
     end
   end
@@ -275,14 +275,14 @@ RSpec.describe AdaptiveConfiguration::Builder do
     end
   end
 
-  describe 'multiple nested groups' do
-    it 'handles multiple levels of nested groups' do
+  describe 'multiple nested parameters' do
+    it 'handles multiple levels of nested parameters' do
       configuration = AdaptiveConfiguration::Builder.new do
-        group :level1 do
+        parameters :level1 do
           parameter :param1, String, default: 'default1'
-          group :level2 do
+          parameters :level2 do
             parameter :param2, String, default: 'default2'
-            group :level3 do
+            parameters :level3 do
               parameter :param3, String, default: 'default3'
             end
           end

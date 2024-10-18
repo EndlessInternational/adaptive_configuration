@@ -2,14 +2,14 @@ require 'spec_helper.rb'
 
 RSpec.describe AdaptiveConfiguration::Scaffold do
 
-  describe 'default options on groups and group members' do
+  describe 'default options on parameters and parameters members' do
 
-    context 'when a default options is set for a group' do 
+    context 'when a default options is set for parameters' do 
       
       let( :definitions ) {
         {
           message: {
-            type: :group, 
+            type: Object, 
             default: { role: :default },
             definitions: {
               role: { type: Symbol },
@@ -19,7 +19,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         }
       }
 
-      it 'creates the group and assigns the default value' do
+      it 'creates the parameters and assigns the default value' do
         scaffold = build_scaffold( definitions: definitions )
         scaffold.message { text 'text' }
         
@@ -67,13 +67,13 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
 
     end
 
-    context 'when a default option is set for a group member' do 
-      context 'and the group itself does not have a default' do 
+    context 'when a default option is set for parameters member' do 
+      context 'and the parameters do not have a default' do 
 
         let( :definitions ) {
           {
             message: {
-              type: :group, 
+              type: Object, 
               definitions: {
                 role: { type: Symbol, default: :system },
                 text: { type: String }
@@ -82,7 +82,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
           }
         }
         
-        context 'and the group is not explicitly referenced' do 
+        context 'and the parameters are not explicitly referenced' do 
           it 'does not assign the default' do
             scaffold = build_scaffold( definitions: definitions )
 
@@ -91,7 +91,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
           end
         end 
         
-        context 'and the group is explicitly referenced but the parameter is not' do 
+        context 'and the parameters are explicitly referenced but the parameter is not' do 
           it 'does assign the default' do 
             scaffold = build_scaffold( definitions: definitions )
             scaffold.message {
@@ -105,12 +105,12 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         end
       end
 
-      context 'and the group itself does have a default' do 
+      context 'and the parameters do not have a default' do 
       
         let( :definitions ) {
           {
             message: {
-              type: :group, 
+              type: Object, 
               default: {},
               definitions: {
                 role: { type: Symbol, default: :system },
@@ -120,7 +120,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
           }
         }
         
-        context 'and the group is not explicitly referenced' do 
+        context 'and the parameters are not explicitly referenced' do 
           it 'it does assign the default' do
             scaffold = build_scaffold( definitions: definitions )
 
@@ -130,7 +130,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
           end
         end 
         
-        context 'and the group is explicitly referenced but the parameter with a default is not set' do 
+        context 'and the parameters are explicitly referenced but the parameter with a default is not set' do 
           it 'does assign the default' do 
             scaffold = build_scaffold( definitions: definitions )
             scaffold.message { text 'text' } 

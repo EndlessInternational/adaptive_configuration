@@ -2,13 +2,13 @@ require 'spec_helper.rb'
 
 RSpec.describe AdaptiveConfiguration::Scaffold do
 
-  describe 'group array' do
-    context 'when a group array is defined' do 
+  describe 'parameters array' do
+    context 'when a parameters array is defined' do 
 
       let( :definitions ) {
         {
           message: {
-            type: :group, 
+            type: Object, 
             array: true,
             definitions: {
               role: {},
@@ -18,9 +18,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         }
       }
           
-      context 'when the group is called once' do
+      context 'when the parameters are called once' do
         context 'through a builder' do
-          it 'includes an array of objects' do 
+          it 'results in an array of hashes' do 
             scaffold = build_scaffold( definitions: definitions )
 
             scaffold.message do 
@@ -38,7 +38,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         end
 
         context 'through attributes' do 
-          it 'includes an array of objects' do 
+          it 'includes an array of hashes' do 
             attributes = { message: [ { role: :system, text: 'text' } ] }
             scaffold = build_scaffold( attributes, definitions: definitions )
 
@@ -52,9 +52,9 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         end
       end
 
-      context 'when the group is called multiple times' do
+      context 'when parameters are called multiple times' do
         context 'through a builder' do
-          it 'includes an array of mulitple objects' do 
+          it 'includes an array of mulitple hashes' do 
             scaffold = build_scaffold( definitions: definitions )
 
             scaffold.message do 
@@ -85,7 +85,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         end
 
         context 'through attributes' do 
-          it 'includes an array of multiple objects' do 
+          it 'includes an array of multiple hashes' do 
             attributes = { 
               message: [ 
                 { role: :system, text: 'text 0' }, 
@@ -109,18 +109,18 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
     end
   end
 
-  describe 'group types with array option nested in groups with array option' do
-    context 'when configured with a group array inside a group array' do 
+  describe 'parameters with array option nested in parameters with array option' do
+    context 'when configured with a parameters array inside a parameters array' do 
 
       let( :definitions ) {
         {
           message: {
-            type: :group, 
+            type: Object, 
             array: true,
             definitions: {
               role: {},
               content: {
-                type: :group,
+                type: Object,
                 array: true,
                 definitions: {
                   text: { type: String }
@@ -131,8 +131,8 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         }
       }
           
-      context 'when one array group entry is given' do
-        context 'with one array group entry inside that group' do 
+      context 'when one array parameters entry is given' do
+        context 'with one array parameters entry inside that parameters' do 
           context 'when using a builder' do 
             it 'configures the context with the outer and inner entry' do 
               scaffold = build_scaffold( definitions: definitions )
@@ -182,13 +182,13 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
     end
   end
 
-  describe 'group types with array option and as option' do
-    context 'when configured with a group array' do 
+  describe 'parameters types with array option and as option' do
+    context 'when configured with a parameters array' do 
 
       let( :definitions ) {
         {
           message: {
-            type: :group, 
+            type: Object, 
             array: true,
             as: :messages,
             definitions: {
@@ -199,7 +199,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         }
       }
           
-      context 'when one array group entry is given' do
+      context 'when one array parameters entry is given' do
         context 'when using a builder' do
           it 'configures the context with the entry' do 
             scaffold = build_scaffold( definitions: definitions )
@@ -236,19 +236,19 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
     end
   end
 
-  describe 'group types with array option and as option nested in groups with array option and as option' do
-    context 'when configured with a group array inside a group array' do 
+  describe 'parameters types with array option and as option nested in parameters with array option and as option' do
+    context 'when configured with a parameters array inside a parameters array' do 
 
       let( :definitions ) {
         {
           message: {
-            type: :group, 
+            type: Object, 
             array: true,
             as: :messages,
             definitions: {
               role: {},
               content: {
-                type: :group,
+                type: Object,
                 array: true,
                 as: :contents,
                 definitions: {
@@ -260,8 +260,8 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
         }
       }
           
-      context 'when one array group entry is given' do
-        context 'with one array group entry inside that group' do 
+      context 'when one array parameters entry is given' do
+        context 'with one array parameters entry inside that parameters' do 
           context 'when using a builder' do 
             it 'configures the context with the outer and inner entry' do 
               scaffold = build_scaffold( definitions: definitions )

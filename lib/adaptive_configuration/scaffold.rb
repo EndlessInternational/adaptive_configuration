@@ -85,7 +85,7 @@ module AdaptiveConfiguration
         name = definition[ :as ] || method
 
         unless definition[ :array ] 
-          if definition[ :type ] == :group
+          if definition[ :type ] == ::Object
             value = args.first 
             context = @values[ name ]
             if context.nil? || value  
@@ -107,7 +107,7 @@ module AdaptiveConfiguration
           @values[ name ] = definition[ :default_assigned ] ? 
             ::Array.new : 
             @values[ name ] || ::Array.new
-          if definition[ :type ] == :group
+          if definition[ :type ] == ::Object
             values = [ args.first ].flatten
             values = values.map do | v |
               context = Scaffold.new( 

@@ -17,11 +17,11 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       expect( result[ :max_tokens ] ).to eq( 100 )
     end
 
-    it 'initializes with given definitions and values when groups are present' do
+    it 'initializes with given definitions and values when parameters are present' do
       definitions = {
         api_key: { type: String },
         chat_options: {
-          type: :group,
+          type: Object,
           definitions: {
             max_tokens: { type: Integer, default: 100 }
           }
@@ -48,11 +48,11 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       expect( result[ :maxTokens ] ).to eq( 100 )
     end
 
-    it 'initializes with given values when groups and aliases are present' do
+    it 'initializes with given values when parameters and aliases are present' do
       definitions = {
         api_key: { type: String, as: :apiKey },
         chat_options: {
-          type: :group,
+          type: Object,
           as: :chatOptions,
           definitions: {
             max_tokens: { type: Integer, default: 100, as: :maxTokens }
@@ -79,10 +79,10 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       expect( result[ :retries ] ).to eq( 3 )
     end
 
-    it 'initializes nested contexts for group types' do
+    it 'created nested hashes for parameters types' do
       definitions = {
         database: {
-          type: :group,
+          type: Object,
           default: {},
           definitions: {
             host: { type: String, default: 'localhost' },

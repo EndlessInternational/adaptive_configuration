@@ -2,12 +2,12 @@ require 'spec_helper.rb'
 
 RSpec.describe AdaptiveConfiguration::Scaffold do
 
-  describe 'group types with arguments' do
+  describe 'parameters with arguments' do
 
-    it 'handles group nil value parameters correctly' do
+    it 'handles nil parameters argument correctly' do
       definitions = {
         group_a: {
-          type: :group,
+          type: Object,
           definitions: {
             value_a: {
               type: String
@@ -23,10 +23,10 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       expect( scaffold.to_h[ :group_a ][ :value_a ] ).to eq( nil )
     end
 
-    it 'handles group value parameters correctly' do
+    it 'handles values inside parameters correctly' do
       definitions = {
         group_a: {
-          type: :group,
+          type: Object,
           definitions: {
             value_a: {
               type: String
@@ -40,16 +40,16 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       expect( scaffold.to_h[ :group_a ][ :value_a ] ).to eq( 'A' )
     end
 
-    it 'handles nested group value parameters correctly' do
+    it 'handles values inside paramters inside parameters correctly' do
       definitions = {
         group_a: {
-          type: :group,
+          type: Object,
           definitions: {
             value_a: {
               type: String
             },
             group_b: {
-              type: :group,
+              type: Object,
               definitions: {
                 value_b: {
                   type: String

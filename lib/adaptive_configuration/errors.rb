@@ -2,7 +2,6 @@ module AdaptiveConfiguration
   
   class Error < StandardError; end
 
-
   class IncompatibleTypeError < Error
 
     attr_reader :keypath 
@@ -17,12 +16,12 @@ module AdaptiveConfiguration
       @type = type
       type_text = @type.respond_to?( :join ) ? type.join( ', ' ) : type
 
-      super( "The parameter '#{@keypath}' expects #{type_text} but received incompatible #{value.class.name}." )
+      super( "The parameter '#{@keypath}' expects '#{type_text}' but incompatible '#{value.class.name}' was given." )
     end
 
   end
 
-  class RequirementUnmetError < Error
+  class RequiredOptionError < Error
 
     attr_reader :keypath 
     attr_reader :key 
@@ -31,7 +30,21 @@ module AdaptiveConfiguration
       path = path ? path.chomp( '/' ) : nil 
       @key = key
       @keypath = path ? ( path + '/' + @key.to_s ) : key.to_s    
-      super( "The parameter #{@keypath} is required." )
+      super( "The parameter '#{@keypath}' is required but no value was given." )
+    end
+
+  end
+
+  class InOptionError < Error 
+    
+    attr_reader :keypath 
+    attr_reader :key 
+
+    def initialize( path: nil, key:, option:, value: )
+      path = path ? path.chomp( '/' ) : nil 
+      @key = key
+      @keypath = path ? ( path + '/' + @key.to_s ) : key.to_s    
+      super( "The parameter '#{@keypath}' must be in '#{option.to_s}' but '#{value.to_s}' was given." )
     end
 
   end

@@ -16,10 +16,10 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       expect( result[ :apiKey ] ).to be_nil
     end
 
-    it 'applies the :as option within nested groups' do
+    it 'applies the :as option within nested parameters' do
       definitions = {
         settings: {
-          type: :group,
+          type: Object,
           definitions: {
             userName: { type: String, as: :user_name }
           }

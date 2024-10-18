@@ -4,11 +4,11 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
 
   describe 'to_h method' do
 
-    it 'converts context to a hash' do
+    it 'converts scaffold to a hash' do
       definitions = {
         api_key:  { type: String },
         options:  {
-          type: :group,
+          type: Object,
           definitions: {
             model: { type: String }
           }
@@ -31,17 +31,17 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       expect( scaffold.to_h ).to eq( expected_hash )
     end
 
-    it 'handles empty contexts' do
+    it 'handles empty scaffolds' do
       definitions = {}
       scaffold = build_scaffold( definitions: definitions )
 
       expect( scaffold.to_h ).to eq( {} )
     end
 
-    it 'handles nested contexts with arrays' do
+    it 'handles nested scaffolds with arrays' do
       definitions = {
         messages: {
-          type: :group,
+          type: Object,
           array: true,
           definitions: {
             role:    { type: String },

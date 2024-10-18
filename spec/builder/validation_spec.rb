@@ -33,9 +33,84 @@ RSpec.describe AdaptiveConfiguration::Builder do
 
           result = builder.validate( {} )
           expect( result ).to be_a( Array )
-          expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::RequirementUnmetError )
+          expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::RequiredOptionError )
 
           expect( builder.valid?( {} ) ).to eq( false )
+        end
+      end
+      context 'with a parameter that includes a :in option' do
+        context 'with a parameter without a type' do 
+          it 'validates the parameter' do
+            builder = construct_builder do 
+              parameter :a_parameter, in: [ :one, :two, :three ]  
+            end
+
+            expect( builder.validate( { a_parameter: :one } ) ).to eq( [] )
+            expect( builder.valid?( { a_parameter: :one } ) ).to eq( true )
+
+            build = builder.build { a_parameter 'two' }
+            result = builder.validate( build )
+            expect( result ).to be_a( Array )
+            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::InOptionError )
+            expect( builder.valid?( build ) ).to eq( false )
+
+            result = builder.validate( { a_parameter: :zero } )
+            expect( result ).to be_a( Array )
+            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::InOptionError )
+            expect( builder.valid?( { a_parameter: 0 } ) ).to eq( false )
+
+            result = builder.validate( {} )
+            expect( result ).to be_a( Array )
+            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::InOptionError )
+
+            expect( builder.valid?( {} ) ).to eq( false )
+          end
+        end
+        context 'with a parameter with a non-Numeric type' do 
+          it 'validates the parameter' do
+            builder = construct_builder do 
+              parameter :a_parameter, Symbol, in: [ :one, :two, :three ]  
+            end
+
+            expect( builder.validate( { a_parameter: :one } ) ).to eq( [] )
+            expect( builder.valid?( { a_parameter: :one } ) ).to eq( true )
+
+            build = builder.build { a_parameter 'two' }
+            expect( builder.validate( build ) ).to eq( [] )
+            expect( builder.valid?( build ) ).to eq( true )
+
+            result = builder.validate( { a_parameter: :zero } )
+            expect( result ).to be_a( Array )
+            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::InOptionError )
+            expect( builder.valid?( { a_parameter: 0 } ) ).to eq( false )
+
+            result = builder.validate( {} )
+            expect( result ).to be_a( Array )
+            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::InOptionError )
+
+            expect( builder.valid?( {} ) ).to eq( false )
+          end
+        end
+        context 'with a parameter with a Numeric type' do 
+          it 'validates the parameter' do
+            builder = construct_builder do 
+              parameter :a_parameter, Integer, in: 1..10 
+            end
+
+            expect( builder.validate( { a_parameter: 1 } ) ).to eq( [] )
+            expect( builder.valid?( { a_parameter: 1 } ) ).to eq( true )
+
+            result = builder.validate( { a_parameter: 0 } )
+            expect( result ).to be_a( Array )
+            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::InOptionError )
+            expect( builder.valid?( { a_parameter: 0 } ) ).to eq( false )
+
+            result = builder.validate( {} )
+            expect( result ).to be_a( Array )
+            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::InOptionError )
+
+            expect( builder.valid?( {} ) ).to eq( false )
+          end
         end
       end
       context 'with a parameter that includes a :type and a :required option' do
@@ -54,25 +129,25 @@ RSpec.describe AdaptiveConfiguration::Builder do
 
           result = builder.validate( {} )
           expect( result ).to be_a( Array )
-          expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::RequirementUnmetError )
+          expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::RequiredOptionError )
           expect( builder.valid?( {} ) ).to eq( false )
         end
       end
     end
 
-    context 'with a builder defining a single paramter inside a group' do
-      context 'with a group that is not required' do 
-        context 'with a parameter that includes a :type option' do
+    context 'with a builder defining a single parameter inside parameters' do
+      context 'with parameters that is not required' do 
+        context 'with parameter that includes a :type option' do
           it 'validates the parameter' do
             builder = construct_builder do 
-              group :a_group do 
+              parameters :a_parameters do 
                 parameter :a_parameter, type: Integer
               end
             end
 
-            expect( builder.validate( { a_group: { a_parameter: 0 } } ) ).to eq( [] )
+            expect( builder.validate( { a_parameters: { a_parameter: 0 } } ) ).to eq( [] )
 
-            result = builder.validate( { a_group: { a_parameter: 'nan' } } )
+            result = builder.validate( { a_parameters: { a_parameter: 'nan' } } )
             expect( result ).to be_a( Array )
             expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::IncompatibleTypeError )
           end
@@ -80,13 +155,13 @@ RSpec.describe AdaptiveConfiguration::Builder do
         context 'with a parameter that includes a :required option' do
           it 'validates the parameter' do
             builder = construct_builder do 
-              group :a_group do 
+              parameters :a_parameters do 
                 parameter :a_parameter, required: true
               end
             end
 
-            expect( builder.validate( { a_group: { a_parameter: 0 } } ) ).to eq( [] )
-            expect( builder.validate( { a_group: { a_parameter: 'nan' } } ) ).to eq( [] )
+            expect( builder.validate( { a_parameters: { a_parameter: 0 } } ) ).to eq( [] )
+            expect( builder.validate( { a_parameters: { a_parameter: 'nan' } } ) ).to eq( [] )
 
             result = builder.validate( {} )
             expect( result ).to eq( [] )
@@ -95,14 +170,14 @@ RSpec.describe AdaptiveConfiguration::Builder do
         context 'with a parameter that includes a :type and a :required option' do
           it 'validates the parameter' do
             builder = construct_builder do 
-              group :a_group do 
+              parameters :a_parameters do 
                 parameter :a_parameter, type: Integer, required: true
               end
             end
 
-            expect( builder.validate( { a_group: { a_parameter: 0 } } ) ).to eq( [] )
+            expect( builder.validate( { a_parameters: { a_parameter: 0 } } ) ).to eq( [] )
 
-            result = builder.validate( { a_group: { a_parameter: 'nan' } } )
+            result = builder.validate( { a_parameters: { a_parameter: 'nan' } } )
             expect( result ).to be_a( Array )
             expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::IncompatibleTypeError )
 
@@ -111,55 +186,55 @@ RSpec.describe AdaptiveConfiguration::Builder do
           end
         end
       end
-      context 'with a group that is required' do 
+      context 'with parameters that is required' do 
         context 'with a parameter that includes a :type option' do
           it 'validates the parameter' do
             builder = construct_builder do 
-              group :a_group, required: true do 
+              parameters :a_parameters, required: true do 
                 parameter :a_parameter, type: Integer
               end
             end
 
-            expect( builder.validate( { a_group: { a_parameter: 0 } } ) ).to eq( [] )
+            expect( builder.validate( { a_parameters: { a_parameter: 0 } } ) ).to eq( [] )
 
-            result = builder.validate( { a_group: { a_parameter: 'nan' } } )
+            result = builder.validate( { a_parameters: { a_parameter: 'nan' } } )
             expect( result ).to be_a( Array )
             expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::IncompatibleTypeError )
           end
         end
-        context 'with a parameter that includes a :required option' do
+        context 'with parameter that includes a :required option' do
           it 'validates the parameter' do
             builder = construct_builder do 
-              group :a_group, required: true do 
+              parameters :a_parameters, required: true do 
                 parameter :a_parameter, required: true
               end
             end
 
-            expect( builder.validate( { a_group: { a_parameter: 0 } } ) ).to eq( [] )
-            expect( builder.validate( { a_group: { a_parameter: 'nan' } } ) ).to eq( [] )
+            expect( builder.validate( { a_parameters: { a_parameter: 0 } } ) ).to eq( [] )
+            expect( builder.validate( { a_parameters: { a_parameter: 'nan' } } ) ).to eq( [] )
 
             result = builder.validate( {} )
             expect( result ).to be_a( Array )
-            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::RequirementUnmetError )
+            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::RequiredOptionError )
           end
         end
-        context 'with a parameter that includes a :type and a :required option' do
+        context 'with parameter that includes a :type and a :required option' do
           it 'validates the parameter' do
             builder = construct_builder do 
-              group :a_group, required: true do 
+              parameters :a_parameters, required: true do 
                 parameter :a_parameter, type: Integer, required: true
               end
             end
 
-            expect( builder.validate( { a_group: { a_parameter: 0 } } ) ).to eq( [] )
+            expect( builder.validate( { a_parameters: { a_parameter: 0 } } ) ).to eq( [] )
 
-            result = builder.validate( { a_group: { a_parameter: 'nan' } } )
+            result = builder.validate( { a_parameters: { a_parameter: 'nan' } } )
             expect( result ).to be_a( Array )
             expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::IncompatibleTypeError )
 
             result = builder.validate( {} )
             expect( result ).to be_a( Array )
-            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::RequirementUnmetError )
+            expect( result[ 0 ] ).to be_a( AdaptiveConfiguration::RequiredOptionError )
           end
         end
       end

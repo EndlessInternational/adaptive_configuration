@@ -1,7 +1,7 @@
 require_relative 'scaffold'
 
 module AdaptiveConfiguration 
-  class GroupBuilder
+  class PropertiesBuilder
 
     attr_reader :definitions
 
@@ -25,22 +25,32 @@ module AdaptiveConfiguration
         options = args[ 1 ] || {}
         options[ :type ] = args.first
       end
+
+      validate_in!( name, options[ :type ], options[ :in ] ) if options[ :in ] 
       
       @definitions[ name ] = options
     end
 
-    def group( name, options = {}, &block )
+    def parameters( name, options = {}, &block )
       
       raise NameError, "The name '#{name}' is reserved and cannot be used for parameters." \
         if AdaptiveConfiguration::Scaffold.instance_methods.include?( name )
       
-      builder = GroupBuilder.new
+      builder = PropertiesBuilder.new
       builder.instance_eval( &block ) if block
       @definitions[ name ] = options.merge( { 
-        type: :group, 
+        type: Object, 
         definitions: builder.definitions 
       } )
 
+    end
+
+  private
+
+    def validate_in!( name, type, in_option )
+     raise TypeError,
+            "The parameter '#{name}' includes the :in option but it does not respond to 'include?'." \
+        unless in_option.respond_to?( :include? )
     end
 
   end

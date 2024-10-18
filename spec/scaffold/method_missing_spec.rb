@@ -6,7 +6,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
     {
       api_key:  { type: String },
       options:  {
-        type: :group,
+        type: Object,
         definitions: {
           model: { type: String }
         }
@@ -24,7 +24,7 @@ RSpec.describe AdaptiveConfiguration::Scaffold do
       expect( result[ :api_key ] ).to eq( 'test-key' )
     end
 
-    it 'supports nested groups using method calls' do
+    it 'supports nested parameters using method calls' do
       scaffold = build_scaffold( definitions: definitions )
 
       scaffold.options do

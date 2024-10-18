@@ -1,13 +1,13 @@
-require_relative 'group_builder'
+require_relative 'properties_builder'
 require_relative 'scaffold'
 
-# types must be included to support conversation
+# types must be included to support coersion
 require 'time'
 require 'date'
 require 'uri'
 
 module AdaptiveConfiguration 
-  class Builder < GroupBuilder
+  class Builder < PropertiesBuilder
 
     DEFAULT_CONVERTERS = {
 
@@ -106,8 +106,7 @@ module AdaptiveConfiguration
 
       path.chomp( '/' ) if path
       unless values.is_a?( Hash )
-        # TODO: raise error
-        return
+        raise ArgumentError, "The values must always be a Hash." 
       end
 
       definitions.each do | key, definition |
@@ -117,10 +116,14 @@ module AdaptiveConfiguration
 
         if definition[ :required ] && 
            ( !value || ( value.respond_to?( :empty ) && value.empty? ) )
-          block.call( RequirementUnmetError.new( path: path, key: key ) )
+          block.call( RequiredOptionError.new( path: path, key: key ) )
+        elsif definition[ :in ] && !definition[ :in ].include?( value )
+          block.call( 
+            InOptionError.new( path: path, key: key, option: definition[ :in ], value: value )
+          )
         elsif !definition[ :default_assigned ] && !value.nil?
           unless definition[ :array ]
-            if definition[ :type ] == :group
+            if definition[ :type ] == Object
               traverse_and_validate_values( 
                 values[ name ],
                 definitions: definition[ :definitions ],
@@ -137,7 +140,7 @@ module AdaptiveConfiguration
               end
             end
           else 
-            if definition[ :type ] == :group
+            if definition[ :type ] == Object
               groups = Array( value )
               groups.each do | group |
                 traverse_and_validate_values(
