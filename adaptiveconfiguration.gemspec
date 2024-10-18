@@ -1,7 +1,7 @@
 Gem::Specification.new do | spec |
 
   spec.name          = 'adaptiveconfiguration'
-  spec.version       = '1.0.0.beta08'
+  spec.version       = '1.0.0.beta09'
   spec.authors       = [ 'Kristoph Cichocki-Romanov' ]
   spec.email         = [ 'rubygems.org@kristoph.net' ]
 
