@@ -40,9 +40,11 @@ require 'adaptiveconfiguration'
 
 ### Defining Configurations with AdaptiveConfiguration
 
-AdaptiveConfiguration permits the caller to define a domain specific language +Builder+ 
-specifying parameters, parameter collections, and related options. This builder can then 
-be used to build or validate the configuration using the domain specific language. 
+AdaptiveConfiguration permits the caller to instantiate define a domain specific language 
++Builder+ with parameters, parameter collections, and related options. The builder can then
+be used to build or validate a configuration using a domain specific buildler. 
+
+The build method always returns a Hash with symbolic keys/
 
 ---
 
@@ -51,7 +53,7 @@ be used to build or validate the configuration using the domain specific languag
 **Parameters** are the basic building blocks of your configuration. They represent individual 
 settings or options that you can define with specific types, defaults, and other attributes.
 
-When defining a parameter, you specify its name and optionally type, default and alias.
+When defining a parameter, you specify its name and optionally type, default and other options.
 
 ### Example:
 
@@ -60,7 +62,7 @@ require 'adaptiveconfiguration'
 
 # define a configuration structure with parameters
 configuration = AdaptiveConfiguration::Builder.new do
-  parameter :api_key, String
+  parameter :api_key
   parameter :version, String, default: '1.0'
 end
 
@@ -77,7 +79,8 @@ puts result[:version]   # => "1.0"
 **Notes:**
 
 - **Defining Parameters:**
-  - `parameter :api_key, String` defines a parameter named `:api_key` with the type `String`.
+  - `parameter :api_key` defines a parameter named `:api_key`. A value of any type can be used to 
+    assign the parameter.
   - `parameter :version, String, default: '1.0'` defines a parameter with a default value.
 - **Building the Configuration:**
   - `configuration.build!` creates a context where you can set values for the parameters.
@@ -88,10 +91,9 @@ puts result[:version]   # => "1.0"
 
 ---
 
-## Groups
+## Hierarchical Parameters
 
-**Groups** allow you to organize related parameters into nested structures. This is useful for 
-logically grouping settings and creating hierarchical configurations.
+**Parameters** may be organized hierarchically, grouping related parameters. 
 
 ### Example:
 
@@ -100,7 +102,7 @@ require 'adaptiveconfiguration'
 
 configuration = AdaptiveConfiguration::Builder.new do
   parameter :api_key, String
-  group :chat_options do
+  parameters :chat_options do
     parameter :model, String, default: 'claude-3'
     parameter :max_tokens, Integer, default: 1000
     parameter :temperature, Float, default: 0.5
@@ -125,14 +127,14 @@ puts result[:chat_options][:stream]       # => true
 
 **Notes:**
 
-- **Defining a Group:**
-  - `group :chat_options do ... end` defines a group named `:chat_options`.
-  - Inside the group, you can define parameters that belong to that group.
-- **Setting Values in Groups:**
-  - In the build block, you can set values for parameters within groups by nesting blocks.
-  - `chat_options do ... end` allows you to set parameters inside the `:chat_options` group.
+- **Defining a parameters collection:**
+  - `parameters :chat_options do ... end` defines parameters named `:chat_options`.
+  - Inside the parameters collection, you can define parameters that belong to that collection.
+- **Setting Values in parameter colleciton:**
+  - In the build block, you can set values for parameters within parameters by nesting blocks.
+  - `chat_options do ... end` allows you to set parameters inside the `:chat_options` parameters.
 - **Accessing Values:**
-  - You access group parameters by chaining the keys: `result[:chat_options][:model]`.
+  - You access parameters parameters by chaining the keys: `result[:chat_options][:model]`.
 
 ---
 
@@ -149,10 +151,20 @@ require 'adaptiveconfiguration'
 
 configuration = AdaptiveConfiguration::Builder.new do
   parameter :api_key, String
-  group :request_options do
+  parameters :request_options do
     parameter :headers, String, array: true
   end
 end
+
+result = configuration.build! do
+  api_key 'your-api-key'
+  request_options do
+    headers 'Content-Type: application/json'
+    headers 'Authorization: Bearer token'
+  end
+end
+
+# ... or alterativelly 
 
 result = configuration.build! do
   api_key 'your-api-key'
@@ -169,9 +181,11 @@ puts result[:request_options][:headers]
 **Notes:**
 
 - **Defining an Array Parameter:**
-  - `parameter :headers, String, array: true` defines `:headers` as an array parameter of type `String`.
+  - `parameter :headers, String, array: true` defines `:headers` as an array parameter of 
+    type `String`.
 - **Setting Values:**
-  - You can assign an array of values to `headers`.
+  - You can assign multiple headers to the array by calling the `headers` method muliple 
+    times ( or optionally, simply passing the method an array ).
 - **Accessing Values:**
   - The values are stored as an array, and you can access them directly.
 
@@ -190,7 +204,7 @@ require 'adaptiveconfiguration'
 
 configuration = AdaptiveConfiguration::Builder.new do
   parameter :api_key, String, as: :apiKey
-  group :user_settings, as: :userSettings do
+  parameters :user_settings, as: :userSettings do
     parameter :user_name, String, as: :userName
   end
 end
@@ -212,7 +226,7 @@ puts result[:userSettings][:userName]  # => "john_doe"
 - **Using the `:as` Option:**
   - `parameter :apiKey, String, as: :api_key` defines a parameter that you set using `apiKey`, 
      but it's stored as `:api_key` in the result.
-  - Similarly, `group :userSettings, as: :user_settings` maps the group name.
+  - Similarly, `parameters :userSettings, as: :user_settings` maps the parameters name.
 - **Setting Values:**
   - In the build block, you use the original names (`apiKey`, `userSettings`), but the values 
     are stored under the mapped keys.
@@ -233,7 +247,7 @@ require 'adaptiveconfiguration'
 
 configuration = AdaptiveConfiguration::Builder.new do
   parameter :api_key, String, default: 'default-api-key'
-  group :settings do
+  parameters :settings do
     parameter :timeout, Integer, default: 30
     parameter :retries, Integer, default: 3
   end
@@ -264,7 +278,11 @@ puts result[:settings][:retries]   # => 3
 
 AdaptiveConfiguration automatically handles type conversion based on the parameter's specified 
 type. If you provide a value that can be converted to the specified type, it will do so. 
-If conversion fails, it raises a `TypeError`.
+If conversion fails, the value will remain unchanged. 
+
+You can call +valid?+, +validate+ or +valiate!+ on your builder instance to return true if all 
+types are valid, return an array of type errors, or raise an exception when a type error is 
+encoutered. 
 
 ### Example:
 
@@ -295,14 +313,13 @@ puts result[:start_date]   # => #<Date: 2023-01-01 ...>
   - AdaptiveConfiguration converts `'1500'` to `1500` (Integer).
   - Converts `'0.75'` to `0.75` (Float).
   - Converts `'2023-01-01'` to a `Date` object.
-- **Error Handling:**
-  - If you provide a value that cannot be converted, it raises a `TypeError`.
 
 ---
 
 ## Custom Converters
 
-You can define custom converters for your own types, allowing you to extend the framework's capabilities.
+You can define custom converters for your own types, allowing you to extend the gem's 
+capabilities.
 
 ### Example:
 
@@ -343,20 +360,17 @@ puts result[:name].class    # => UpcaseString
 
 ---
 
-Certainly! Let's expand the first paragraph and complete the explanation in the section you added to the README.
-
----
-
 ## Transforming and Validating JSON Data
 
-AdaptiveConfiguration can also be utilized to transform and validate JSON data. By defining parameters and groups 
-that mirror the expected structure of your JSON input, you can map and coerce incoming data into the desired format 
-seamlessly. 
+AdaptiveConfiguration can also be utilized to transform and validate JSON data. By defining 
+parameters and parameter collection that mirror the expected structure of your JSON input, you 
+can map and coerce incoming data into the desired format. 
 
-The `:as` option allows you to rename keys during this transformation process, ensuring that your data conforms to 
-specific API requirements or internal data models. Moreover, AdaptiveConfiguration provides built-in validation by 
-raising exceptions when the input data contains unexpected elements or elements of the wrong type, helping you 
-maintain data integrity and catch errors early in your data processing pipeline.
+The `:as` option allows you to rename keys during this transformation process, ensuring that your 
+data conforms to specific API requirements or internal data models. Moreover, AdaptiveConfiguration 
+provides built-in validation by raising exceptions when the input data contains unexpected 
+elements or elements of the wrong type, helping you maintain data integrity and catch errors early 
+in your data processing pipeline.
 
 ### Example:
 
@@ -366,12 +380,12 @@ require 'adaptiveconfiguration'
 # Define the expected structure of the JSON data
 configuration = AdaptiveConfiguration::Builder.new do
   parameter :api_key, String
-  group :user, as: :user_info do
+  parameters :user, as: :user_info do
     parameter :name, String
     parameter :email, String
     parameter :age, Integer
   end
-  group :preferences, as: :user_preferences do
+  parameters :preferences, as: :user_preferences do
     parameter :notifications_enabled, TrueClass
     parameter :theme, String, default: 'light'
   end
@@ -403,7 +417,7 @@ begin
   puts result[:user_info][:age]              # => 30 (Integer)
   puts result[:user_preferences][:theme]     # => "dark"
 
-rescue TypeError => e
+rescue AdaptiveConfiguration::Error  => e
   puts "Validation Error: #{e.message}"
 end
 ```
@@ -411,14 +425,14 @@ end
 **Explanation:**
 
 - **Defining the Structure:**
-  - **Parameters and Groups:**
+  - **Parameters and parameters:**
     - We define a configuration that reflects the expected structure of the input JSON data.
     - `parameter :api_key, String` defines the API key parameter.
-    - `group :user, as: :user_info` defines a group for user data, which will be transformed to the key `:user_info` in the result.
-    - Inside the `:user` group, we define parameters for `:name`, `:email`, and `:age`.
-    - `group :preferences, as: :user_preferences` defines a group for user preferences, transformed to `:user_preferences`.
+    - `parameters :user, as: :user_info` defines a parameters for user data, which will be transformed to the key `:user_info` in the result.
+    - Inside the `:user` parameters, we define parameters for `:name`, `:email`, and `:age`.
+    - `parameters :preferences, as: :user_preferences` defines a parameters for user preferences, transformed to `:user_preferences`.
   - **Using the `:as` Option:**
-    - The `:as` option renames the group keys in the resulting configuration, allowing the internal DSL names to differ from the output keys.
+    - The `:as` option renames the parameters keys in the resulting configuration, allowing the internal DSL names to differ from the output keys.
 
 - **Building the Configuration Context:**
   - **Using `build!`:**
@@ -426,7 +440,7 @@ end
   - **Setting Values from Input Data:**
     - We set the values by extracting them from the `input_data` hash.
     - For example, `api_key input_data['api_key']` sets the `:api_key` parameter.
-    - Within the `user` and `preferences` groups, we set the nested parameters accordingly.
+    - Within the `user` and `preferences` parameters, we set the nested parameters accordingly.
 
 - **Type Conversion and Coercion:**
   - **Automatic Conversion:**
@@ -447,7 +461,7 @@ end
 
 - **Transformation:**
   - **Key Renaming:**
-    - The use of the `:as` option transforms the internal parameter and group names to match the desired output keys.
+    - The use of the `:as` option transforms the internal parameter and parameters names to match the desired output keys.
     - This is particularly useful when the input data keys do not align with the output format required by your application or when interfacing with external APIs.
   - **Structuring Data:**
     - By defining the configuration structure, you effectively map and reorganize the input data into a format that suits your needs.
@@ -473,9 +487,9 @@ By leveraging AdaptiveConfiguration in this way, you can create robust data tran
 
 ---
 
-## Complex Example with Nested Groups and Arrays
+## Complex Example with Nested parameters and Arrays
 
-Here's a comprehensive example that combines parameters, groups, array parameters, and defaults.
+Here's a comprehensive example that combines parameters, parameters, array parameters, and defaults.
 
 ### Example:
 
@@ -484,20 +498,20 @@ require 'adaptiveconfiguration'
 
 configuration = AdaptiveConfiguration::Builder.new do
   parameter :api_key, String
-  group :chat_options do
+  parameters :chat_options do
     parameter :model, String, default: 'claude-3-5'
     parameter :max_tokens, Integer, default: 2000
     parameter :temperature, Float, default: 0.7
     parameter :stream, TrueClass
     parameter :stop_sequences, String, array: true
 
-    group :metadata do
+    parameters :metadata do
       parameter :user_id, String
       parameter :session_id, String
     end
   end
 
-  group :message, as: :messages, array: true do
+  parameters :message, as: :messages, array: true do
     parameter :role, String
     parameter :content, String
   end
@@ -539,7 +553,7 @@ puts result[:messages].map { | msg | msg[:content] }
 
 - **Combining Concepts:**
   - Parameters with defaults (`:model`, `:max_tokens`).
-  - Nested groups (`:chat_options`, `:metadata`).
+  - Nested parameters (`:chat_options`, `:metadata`).
   - Array parameters (`:stop_sequences`, `:messages`).
   - Using the `:as` option to map `:message` to `:messages`.
 - **Setting Values:**
